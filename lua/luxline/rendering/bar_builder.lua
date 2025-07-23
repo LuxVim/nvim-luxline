@@ -97,18 +97,9 @@ end
 function M.update_window(winid, bar_type)
     bar_type = bar_type or 'statusline'
     local bufnr = vim.api.nvim_win_get_buf(winid)
-    local current_win = vim.api.nvim_get_current_win()
     local option_name = bar_type == 'winbar' and 'winbar' or 'statusline'
     
-    local context = {
-        active = winid == current_win,
-        bufnr = bufnr,
-        winid = winid,
-        filetype = vim.api.nvim_get_option_value('filetype', { buf = bufnr }),
-        buftype = vim.api.nvim_get_option_value('buftype', { buf = bufnr }),
-        filename = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ':t')
-    }
-    
+    local context = utils.create_context(winid, bufnr)
     local content = M.build_for_context(context, bar_type)
     vim.api.nvim_set_option_value(option_name, content, { win = winid })
     
@@ -132,6 +123,44 @@ function M.preview(config_override, bar_type)
     end
     
     return preview
+end
+
+-- Convenience methods for statusline
+function M.build_statusline_for_context(context)
+    return M.build_for_context(context, 'statusline')
+end
+
+function M.build_statusline_section(side, status_type, context)
+    return M.build_section(side, status_type, context, 'statusline')
+end
+
+function M.update_all_statusline()
+    return M.update_all_windows('statusline')
+end
+
+function M.update_statusline_window(winid)
+    return M.update_window(winid, 'statusline')
+end
+
+function M.preview_statusline(config_override)
+    return M.preview(config_override, 'statusline')
+end
+
+-- Convenience methods for winbar
+function M.build_winbar_for_context(context)
+    return M.build_for_context(context, 'winbar')
+end
+
+function M.update_all_winbar()
+    return M.update_all_windows('winbar')
+end
+
+function M.update_winbar_window(winid)
+    return M.update_window(winid, 'winbar')
+end
+
+function M.preview_winbar(config_override)
+    return M.preview(config_override, 'winbar')
 end
 
 return M

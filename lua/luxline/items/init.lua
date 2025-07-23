@@ -39,7 +39,7 @@ function M.get_value(item_name, variant, context)
     context = context or utils.get_current_context()
     
     if item.cache then
-        local cache_key = string.format('%s_%s_%s', item_name, variant or 'default', context.bufnr)
+        local cache_key = utils.create_cache_key(item_name, variant, context.bufnr)
         local cached = item_cache[cache_key]
         
         if cached and (vim.loop.now() - cached.timestamp) < item.cache_ttl then
@@ -56,7 +56,7 @@ function M.get_value(item_name, variant, context)
     result = utils.ensure_string(result, '')
     
     if item.cache and result ~= '' then
-        local cache_key = string.format('%s_%s_%s', item_name, variant or 'default', context.bufnr)
+        local cache_key = utils.create_cache_key(item_name, variant, context.bufnr)
         item_cache[cache_key] = {
             value = result,
             timestamp = vim.loop.now()

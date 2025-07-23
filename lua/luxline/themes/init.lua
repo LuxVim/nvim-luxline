@@ -49,14 +49,39 @@ function M.validate_theme(theme, name)
     
     theme = utils.deep_merge(defaults, theme)
     
-    local required_sides = { 'Left', 'Right' }
-    for _, side in ipairs(required_sides) do
-        for i = 1, 7 do
-            local key = 'item' .. side .. i
-            if not theme[key] then
-                local gray_value = math.floor(0x40 + (i - 1) * 0x10)
-                theme[key] = string.format('#%02x%02x%02x', gray_value, gray_value, gray_value)
+    -- Handle both old and new theme structures
+    if theme.gradient then
+        -- New structure: use gradient array for both sides
+        if #theme.gradient ~= 7 then
+            vim.notify('Theme gradient must have exactly 7 colors: ' .. (name or 'unknown'), vim.log.levels.WARN)
+            -- Fill missing colors with fallback
+            for i = #theme.gradient + 1, 7 do
+                theme.gradient[i] = theme.fallback
             end
+        end
+        
+        -- Generate itemLeft/Right from gradient
+        for i = 1, 7 do
+            theme['itemLeft' .. i] = theme.gradient[i] or theme.fallback
+            theme['itemRight' .. i] = theme.gradient[i] or theme.fallback
+        end
+    else
+        -- Legacy structure: validate existing itemLeft/Right
+        local required_sides = { 'Left', 'Right' }
+        for _, side in ipairs(required_sides) do
+            for i = 1, 7 do
+                local key = 'item' .. side .. i
+                if not theme[key] then
+                    local gray_value = math.floor(0x40 + (i - 1) * 0x10)
+                    theme[key] = string.format('#%02x%02x%02x', gray_value, gray_value, gray_value)
+                end
+            end
+        end
+        
+        -- Create gradient array from existing structure for consistency
+        theme.gradient = {}
+        for i = 1, 7 do
+            theme.gradient[i] = theme['itemLeft' .. i]
         end
     end
     
@@ -149,13 +174,9 @@ function M.create_gradient_theme(name, start_color, end_color, foreground)
     
     local theme = {
         foreground = foreground or '#ffffff',
-        fallback = colors[4]
+        fallback = colors[4],
+        gradient = colors
     }
-    
-    for i = 1, 7 do
-        theme['itemLeft' .. i] = colors[i]
-        theme['itemRight' .. i] = colors[i]
-    end
     
     M.register(name, theme)
     return name

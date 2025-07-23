@@ -101,18 +101,24 @@ function M.split_item_variant(item_spec)
     return name, variant ~= '' and variant or nil
 end
 
-function M.get_current_context()
-    local winid = vim.api.nvim_get_current_win()
-    local bufnr = vim.api.nvim_win_get_buf(winid)
+function M.create_context(winid, bufnr)
+    winid = winid or vim.api.nvim_get_current_win()
+    bufnr = bufnr or vim.api.nvim_win_get_buf(winid)
+    local current_win = vim.api.nvim_get_current_win()
     
     return {
+        active = winid == current_win,
         winid = winid,
         bufnr = bufnr,
         filetype = vim.api.nvim_get_option_value('filetype', { buf = bufnr }),
         buftype = vim.api.nvim_get_option_value('buftype', { buf = bufnr }),
-        filename = vim.fn.expand('%:t'),
+        filename = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ':t'),
         cwd = vim.fn.getcwd()
     }
+end
+
+function M.get_current_context()
+    return M.create_context()
 end
 
 function M.gather_window_info()
@@ -156,6 +162,10 @@ function M.validate_config_section(config, section, validator)
     end
     
     return errors
+end
+
+function M.create_cache_key(item_name, variant, bufnr)
+    return string.format('%s_%s_%s', item_name, variant or 'default', bufnr)
 end
 
 return M
