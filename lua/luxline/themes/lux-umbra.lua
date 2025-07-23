@@ -1,6 +1,6 @@
 local themes = require('luxline.themes')
 
-themes.register('umbra', {
+themes.register('lux-umbra', {
     foreground = '#f4edff',
     fallback = '#5b3094',
     

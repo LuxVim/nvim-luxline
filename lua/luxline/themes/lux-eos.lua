@@ -1,6 +1,6 @@
 local themes = require('luxline.themes')
 
-themes.register('eos', {
+themes.register('lux-eos', {
     foreground = '#1a1a1a',
     fallback = '#ff8e53',
     

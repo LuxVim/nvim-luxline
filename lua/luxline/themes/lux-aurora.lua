@@ -1,6 +1,6 @@
 local themes = require('luxline.themes')
 
-themes.register('aurora', {
+themes.register('lux-aurora', {
     foreground = '#1a1a1a',
     fallback = '#00bfa5',
     

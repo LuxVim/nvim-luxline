@@ -1,6 +1,6 @@
 local themes = require('luxline.themes')
 
-themes.register('vesper', {
+themes.register('lux-vesper', {
     foreground = '#e0e7ff',
     fallback = '#4a3674',
     

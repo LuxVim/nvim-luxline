@@ -1,6 +1,6 @@
 local themes = require('luxline.themes')
 
-themes.register('chroma', {
+themes.register('lux-chroma', {
     foreground = '#1a1a1a',
     fallback = '#20b2aa',
     
