@@ -209,9 +209,14 @@ function M.setup()
     require('luxline.themes.lux-umbra')
     
     events.on('colorscheme_changed', function()
-        local current_theme_name = state.get('theme')
-        if current_theme_name then
-            M.set_theme(current_theme_name)
+        -- Auto-detect lux themes when colorscheme changes
+        if vim.g.colors_name and vim.g.colors_name:match("^lux%-") then
+            M.set_theme(vim.g.colors_name)
+        else
+            local current_theme_name = state.get('theme')
+            if current_theme_name then
+                M.set_theme(current_theme_name)
+            end
         end
     end)
 end
