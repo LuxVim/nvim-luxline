@@ -216,6 +216,9 @@ function M.setup()
             local current_theme_name = state.get('theme')
             if current_theme_name then
                 M.set_theme(current_theme_name)
+            else
+                -- Fallback: refresh theme based on new colorscheme
+                M.set_theme()
             end
         end
     end)
