@@ -22,13 +22,22 @@ function M.get()
     return config
 end
 
-function M.get_items(side, status, filetype, bar_type)
+function M.get_items(side, status, filetype, bar_type, buftype)
     local key = side .. '_' .. status .. '_items'
     
     if bar_type and bar_type ~= 'statusline' then
         key = key .. '_' .. bar_type
     end
     
+    -- Check buftype first (higher priority for winbar)
+    if buftype and buftype ~= '' then
+        local buftype_key = key .. '_buftype_' .. buftype
+        if config[buftype_key] then
+            return vim.deepcopy(config[buftype_key])
+        end
+    end
+    
+    -- Then check filetype
     if filetype then
         local filetype_key = key .. '_' .. filetype
         if config[filetype_key] then
@@ -39,8 +48,19 @@ function M.get_items(side, status, filetype, bar_type)
     return vim.deepcopy(config[key] or defaults[key])
 end
 
-function M.get_separator(side)
+function M.get_separator(side, bar_type)
     local key = side .. '_separator'
+    
+    -- Check for winbar-specific separator first
+    if bar_type == 'winbar' then
+        local winbar_key = 'winbar_' .. key
+        local winbar_separator = config[winbar_key] or defaults[winbar_key]
+        if winbar_separator ~= nil then
+            return winbar_separator
+        end
+    end
+    
+    -- Fall back to statusline separator
     return config[key] or defaults[key]
 end
 

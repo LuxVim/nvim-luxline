@@ -17,8 +17,8 @@ end
 
 function M.build_section(side, status_type, context, bar_type)
     bar_type = bar_type or 'statusline'
-    local item_list = config.get_items(side, status_type, context.filetype, bar_type)
-    local separator = config.get_separator(side)
+    local item_list = config.get_items(side, status_type, context.filetype, bar_type, context.buftype)
+    local separator = config.get_separator(side, bar_type)
     local section = {}
     
     if side == 'right' then
@@ -105,6 +105,7 @@ function M.update_window(winid, bar_type)
         bufnr = bufnr,
         winid = winid,
         filetype = vim.api.nvim_get_option_value('filetype', { buf = bufnr }),
+        buftype = vim.api.nvim_get_option_value('buftype', { buf = bufnr }),
         filename = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ':t')
     }
     

@@ -109,6 +109,7 @@ function M.get_current_context()
         winid = winid,
         bufnr = bufnr,
         filetype = vim.api.nvim_get_option_value('filetype', { buf = bufnr }),
+        buftype = vim.api.nvim_get_option_value('buftype', { buf = bufnr }),
         filename = vim.fn.expand('%:t'),
         cwd = vim.fn.getcwd()
     }
@@ -126,6 +127,7 @@ function M.gather_window_info()
                 bufnr = bufnr,
                 winid = win,  -- Include winid for proper window number calculation
                 filetype = vim.api.nvim_get_option_value('filetype', { buf = bufnr }),
+                buftype = vim.api.nvim_get_option_value('buftype', { buf = bufnr }),
                 filename = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ':t')
             }
         end

@@ -31,9 +31,20 @@ function M.validate_config(user_config)
         'left_separator', 'right_separator', 'default_theme'
     }
     
+    local string_or_nil_keys = {
+        'winbar_left_separator', 'winbar_right_separator'
+    }
+    
     for _, key in ipairs(string_keys) do
         if user_config[key] and type(user_config[key]) ~= 'string' then
             table.insert(errors, key .. ' must be a string')
+        end
+    end
+    
+    for _, key in ipairs(string_or_nil_keys) do
+        local value = user_config[key]
+        if value ~= nil and type(value) ~= 'string' then
+            table.insert(errors, key .. ' must be a string or nil')
         end
     end
     

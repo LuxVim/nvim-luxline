@@ -22,7 +22,6 @@ M.throttled_update = update_manager.throttled_update
 M.debug = debug.debug
 M.preview_config = debug.preview_config
 
--- Theme functionality delegates
 M.set_theme = themes.set_theme
 
 return M
