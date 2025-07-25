@@ -10,7 +10,10 @@ local state = require('luxline.core.state')
 
 function M.setup(opts)
     if state.get('initialized') then
-        vim.notify('Luxline already initialized', vim.log.levels.WARN)
+        config.setup(opts)
+        themes.set_theme()
+        local update_manager = require('luxline.core.update_manager')
+        update_manager.update()
         return
     end
     

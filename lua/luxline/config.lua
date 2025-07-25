@@ -51,17 +51,18 @@ end
 function M.get_separator(side, bar_type)
     local key = side .. '_separator'
     
-    -- Check for winbar-specific separator first
-    if bar_type == 'winbar' then
-        local winbar_key = 'winbar_' .. key
-        local winbar_separator = config[winbar_key] or defaults[winbar_key]
-        if winbar_separator ~= nil then
-            return winbar_separator
+    -- Check for bar_type-specific separator first
+    if bar_type then
+        local specific_key = side .. '_separator_' .. bar_type
+        local specific_separator = config[specific_key] or defaults[specific_key]
+        if specific_separator ~= nil then
+            return specific_separator
         end
     end
     
-    -- Fall back to statusline separator
-    return config[key] or defaults[key]
+    -- Fall back to default separator
+    local fallback = config[key] or defaults[key]
+    return fallback
 end
 
 function M.update_item_config(side, status, items_list, filetype)

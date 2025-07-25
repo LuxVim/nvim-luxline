@@ -32,7 +32,8 @@ function M.validate_config(user_config)
     }
     
     local string_or_nil_keys = {
-        'winbar_left_separator', 'winbar_right_separator'
+        'winbar_left_separator', 'winbar_right_separator',
+        'left_separator_winbar', 'right_separator_winbar'
     }
     
     for _, key in ipairs(string_keys) do

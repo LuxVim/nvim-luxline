@@ -13,14 +13,10 @@ M.defaults = {
     right_active_items_winbar = { 'filename:tail' },
     right_inactive_items_winbar = { 'filename:tail' },
     
-    -- left_separator       = '',
-    -- right_separator      = '',
     left_separator = '█',
     right_separator = '█',
-    
-    -- Winbar separators (defaults to statusline separators if not set)
-    winbar_left_separator = nil,
-    winbar_right_separator = nil,
+    left_separator_winbar = '█',
+    right_separator_winbar = '█',
     
     buffer_exclude = {},
     update_throttle = 20,
