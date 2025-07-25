@@ -25,31 +25,52 @@ function M.build_section(side, status_type, context, bar_type)
         item_list = utils.reverse_table(item_list)
     end
     
+    -- First pass: collect valid items with their rendered positions
+    local valid_items = {}
+    local rendered_position = 1
+    
     for idx, item_spec in ipairs(item_list) do
         local item_name, variant = utils.split_item_variant(item_spec)
         local item_value = items.get_value(item_name, variant, context)
         
         if item_value and item_value ~= '' then
-            local next_idx = M.find_next_valid_item(item_list, idx, context)
-            
-            local hl_item = highlight.item(item_value, side, idx, bar_type)
-            local hl_sep = ''
-            
-            if side == 'left' then
-                -- Left side: separator after item
-                hl_sep = next_idx > 0 and highlight.separator(separator, side, idx, next_idx, bar_type) or 
-                         highlight.separator(separator, side, idx, -1, bar_type) -- End separator
-                table.insert(section, hl_item .. hl_sep)
-            else
-                -- Right side: separator before item (except for last item which is first in reversed order)
-                if idx > 1 then
-                    hl_sep = highlight.separator(separator, side, M.find_previous_valid_item(item_list, idx, context), idx, bar_type)
-                else
-                    -- First item in right side (last in original order) gets separator from default background
-                    hl_sep = highlight.separator(separator, side, -1, idx, bar_type)
-                end
-                table.insert(section, hl_sep .. hl_item)
-            end
+            valid_items[#valid_items + 1] = {
+                original_idx = idx,
+                rendered_idx = rendered_position,
+                item_name = item_name,
+                item_value = item_value,
+                item_spec = item_spec
+            }
+            rendered_position = rendered_position + 1
+        end
+    end
+    
+    -- Second pass: build all highlight groups first
+    local item_highlights = {}
+    for i, item_info in ipairs(valid_items) do
+        local hl_formatted = highlight.item(item_info.item_value, side, item_info.rendered_idx, bar_type, item_info.item_name)
+        local hl_group_name = highlight.extract_highlight_group(hl_formatted)
+        item_highlights[i] = {
+            formatted = hl_formatted,
+            group_name = hl_group_name,
+            item_info = item_info
+        }
+    end
+    
+    -- Third pass: build section with separators
+    for i, hl_info in ipairs(item_highlights) do
+        local hl_sep = ''
+        
+        if side == 'left' then
+            -- Left side: separator after item
+            local next_hl_group = (i < #item_highlights) and item_highlights[i + 1].group_name or nil
+            hl_sep = highlight.separator_direct(separator, side, hl_info.group_name, next_hl_group, bar_type)
+            table.insert(section, hl_info.formatted .. hl_sep)
+        else
+            -- Right side: separator before item
+            local prev_hl_group = (i > 1) and item_highlights[i - 1].group_name or nil
+            hl_sep = highlight.separator_direct(separator, side, prev_hl_group, hl_info.group_name, bar_type)
+            table.insert(section, hl_sep .. hl_info.formatted)
         end
     end
     
