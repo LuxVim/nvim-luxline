@@ -37,69 +37,6 @@ end, {
     variants = { 'icon' }
 })
 
-items.register('encoding', function(variant, context)
-    local enc = vim.bo.fileencoding
-    if enc == '' then
-        enc = vim.o.encoding
-    end
-    
-    if variant == 'short' then
-        local short_names = {
-            ['utf-8'] = 'UTF8',
-            ['utf-16'] = 'UTF16',
-            ['latin1'] = 'LAT1'
-        }
-        return short_names[enc] or enc
-    else
-        return enc
-    end
-end, {
-    description = "File encoding",
-    category = "file",
-    variants = { 'short' }
-})
-
-items.register('modified', function(variant, context)
-    local modified
-    if context and context.bufnr then
-        modified = vim.api.nvim_get_option_value('modified', { buf = context.bufnr })
-    else
-        modified = vim.bo.modified
-    end
-    
-    if variant == 'icon' then
-        return modified and '●' or ''
-    elseif variant == 'short' then
-        return modified and '[+]' or ''
-    else
-        return modified and '[Modified]' or ''
-    end
-end, {
-    description = "File modification indicator",
-    category = "file",
-    variants = { 'icon', 'short' }
-})
-
-items.register('readonly', function(variant, context)
-    local readonly
-    if context and context.bufnr then
-        readonly = vim.api.nvim_get_option_value('readonly', { buf = context.bufnr })
-    else
-        readonly = vim.bo.readonly
-    end
-    
-    if variant == 'icon' then
-        return readonly and '' or ''
-    elseif variant == 'short' then
-        return readonly and '[RO]' or ''
-    else
-        return readonly and '[Readonly]' or ''
-    end
-end, {
-    description = "Read-only file indicator",
-    category = "file",
-    variants = { 'icon', 'short' }
-})
 
 items.register('cwd', function(variant, context)
     local cwd = context and context.cwd or vim.fn.getcwd()
