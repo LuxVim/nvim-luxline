@@ -45,7 +45,7 @@ function M.get_items(side, status, filetype, bar_type, buftype)
         end
     end
     
-    return vim.deepcopy(config[key] or defaults[key])
+    return vim.deepcopy(config[key] ~= nil and config[key] or defaults[key])
 end
 
 function M.get_separator(side, bar_type)
