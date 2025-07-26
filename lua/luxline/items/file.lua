@@ -60,7 +60,12 @@ end, {
 })
 
 items.register('modified', function(variant, context)
-    local modified = vim.bo.modified
+    local modified
+    if context and context.bufnr then
+        modified = vim.api.nvim_get_option_value('modified', { buf = context.bufnr })
+    else
+        modified = vim.bo.modified
+    end
     
     if variant == 'icon' then
         return modified and '●' or ''
@@ -76,7 +81,12 @@ end, {
 })
 
 items.register('readonly', function(variant, context)
-    local readonly = vim.bo.readonly
+    local readonly
+    if context and context.bufnr then
+        readonly = vim.api.nvim_get_option_value('readonly', { buf = context.bufnr })
+    else
+        readonly = vim.bo.readonly
+    end
     
     if variant == 'icon' then
         return readonly and '' or ''
