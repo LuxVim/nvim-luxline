@@ -3,32 +3,19 @@ local M = {}
 local config = require('luxline.config')
 local statusline = require('luxline.rendering.statusline')
 local winbar = require('luxline.rendering.winbar')
-local events = require('luxline.core.events')
-local debounce = require('luxline.core.debounce')
 local state = require('luxline.core.state')
 
+local update_timer = nil
+
 function M.setup_events()
-    events.on('theme_changed', function()
-        statusline.update_all()
-        if config.get().winbar_enabled then
-            winbar.update_all()
-        end
-    end)
+    local group = vim.api.nvim_create_augroup('LuxlineUpdate', { clear = true })
     
-    events.on('git_command_completed', function()
-        M.update()
-    end)
-    
-    events.on('statusline_update_requested', function()
-        M.update()
-    end)
-    
-    events.on('config_updated', function()
-        statusline.update_all()
-        if config.get().winbar_enabled then
-            winbar.update_all()
-        end
-    end)
+    vim.api.nvim_create_autocmd({'BufEnter', 'WinEnter', 'BufWritePost'}, {
+        group = group,
+        callback = function()
+            M.throttled_update()
+        end,
+    })
 end
 
 function M.update()
@@ -47,7 +34,12 @@ function M.throttled_update()
         return
     end
     
-    debounce.throttle('statusline_update', config.get().update_throttle, function()
+    if update_timer then
+        return
+    end
+    
+    update_timer = vim.fn.timer_start(config.get().update_throttle, function()
+        update_timer = nil
         statusline.update_all()
         if config.get().winbar_enabled then
             winbar.update_all()

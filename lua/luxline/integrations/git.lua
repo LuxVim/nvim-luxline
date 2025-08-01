@@ -80,16 +80,22 @@ function M.update_git_info(repo_root, force)
     update_diff_info(repo_root, force)
 end
 
+local git_timers = {}
+
 function M.update_git_info_debounced(repo_root)
     repo_root = repo_root or commands.get_repo_root()
     if not repo_root then
         return
     end
     
-    local debounce_key = 'git_update_' .. repo_root
-    local delay = config.get().git_diff_debounce or 200
+    local timer_key = repo_root
+    if git_timers[timer_key] then
+        vim.fn.timer_stop(git_timers[timer_key])
+    end
     
-    debounce.debounce(debounce_key, delay, function()
+    local delay = config.get().git_diff_debounce or 200
+    git_timers[timer_key] = vim.fn.timer_start(delay, function()
+        git_timers[timer_key] = nil
         M.update_git_info(repo_root, false)
     end)
 end
@@ -149,8 +155,9 @@ function M.setup()
         end,
     })
     
+    local update_manager = require('luxline.core.update_manager')
     events.on('git_command_completed', function(data)
-        events.emit_async('statusline_update_requested')
+        update_manager.throttled_update()
     end)
 end
 

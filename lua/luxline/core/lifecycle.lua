@@ -5,7 +5,6 @@ local themes = require('luxline.themes')
 local git = require('luxline.integrations.git')
 local items = require('luxline.items')
 local events = require('luxline.core.events')
-local debounce = require('luxline.core.debounce')
 local state = require('luxline.core.state')
 
 function M.setup(opts)
@@ -44,12 +43,10 @@ function M.get_stats()
         items_count = #items.get_all_items(),
         highlight_groups = #highlight.get_active_groups(),
         git_repos = vim.tbl_count(state.get('git_info') or {}),
-        pending_operations = debounce.get_pending()
     }
 end
 
 function M.reset()
-    debounce.cancel_all()
     events.clear()
     
     local highlight = require('luxline.rendering.highlight')

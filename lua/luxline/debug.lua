@@ -18,7 +18,7 @@ function M.debug()
     print('Items loaded:', stats.items_count)
     print('Highlight groups:', stats.highlight_groups)
     print('Git repositories:', stats.git_repos)
-    print('Pending operations:', table.concat(stats.pending_operations, ', '))
+    print('Pending operations:', 'none')
     
     print('\n=== Available Items ===')
     local all_items = items.get_all_items()
