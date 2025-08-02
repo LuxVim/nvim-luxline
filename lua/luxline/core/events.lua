@@ -3,27 +3,23 @@ local M = {}
 local listeners = {}
 
 function M.emit(event, data)
-    if listeners[event] then
-        for _, callback in ipairs(listeners[event]) do
-            local ok, err = pcall(callback, data)
+    local event_listeners = listeners[event]
+    if event_listeners then
+        for i = 1, #event_listeners do
+            local ok, err = pcall(event_listeners[i], data)
             if not ok then
-                vim.notify('Luxline event error (' .. event .. '): ' .. err, vim.log.levels.ERROR)
+                vim.schedule(function()
+                    vim.notify('Luxline event error (' .. event .. '): ' .. err, vim.log.levels.ERROR)
+                end)
             end
         end
     end
 end
 
 function M.emit_async(event, data)
-    if listeners[event] then
-        for _, callback in ipairs(listeners[event]) do
-            vim.schedule(function()
-                local ok, err = pcall(callback, data)
-                if not ok then
-                    vim.notify('Luxline async event error (' .. event .. '): ' .. err, vim.log.levels.ERROR)
-                end
-            end)
-        end
-    end
+    vim.schedule(function()
+        M.emit(event, data)
+    end)
 end
 
 function M.on(event, callback)
