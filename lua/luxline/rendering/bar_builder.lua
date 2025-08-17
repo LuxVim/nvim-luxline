@@ -105,11 +105,18 @@ function M.update_all_windows(bar_type)
     local option_name = bar_type == 'winbar' and 'winbar' or 'statusline'
     
     for win, info in pairs(windows) do
+        -- Skip winbar updates for configured disabled filetypes
+        if bar_type == 'winbar' and config.is_winbar_disabled_for_filetype(info.filetype) then
+            goto continue
+        end
+        
         local content = M.build_for_context(info, bar_type)
         local ok, err = pcall(vim.api.nvim_set_option_value, option_name, content, { win = win })
         if not ok then
             vim.notify('Failed to set ' .. bar_type .. ' for window ' .. win .. ': ' .. err, vim.log.levels.WARN)
         end
+        
+        ::continue::
     end
     
     events.emit(bar_type .. '_updated', { window_count = vim.tbl_count(windows) })
@@ -119,6 +126,14 @@ function M.update_window(winid, bar_type)
     bar_type = bar_type or 'statusline'
     local bufnr = vim.api.nvim_win_get_buf(winid)
     local option_name = bar_type == 'winbar' and 'winbar' or 'statusline'
+    
+    -- Skip winbar updates for configured disabled filetypes
+    if bar_type == 'winbar' then
+        local filetype = vim.api.nvim_buf_get_option(bufnr, 'filetype')
+        if config.is_winbar_disabled_for_filetype(filetype) then
+            return
+        end
+    end
     
     local context = utils.create_context(winid, bufnr)
     local content = M.build_for_context(context, bar_type)

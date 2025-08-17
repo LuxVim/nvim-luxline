@@ -53,6 +53,10 @@ function M.validate_config(user_config)
         table.insert(errors, 'buffer_exclude must be a table/array')
     end
     
+    if user_config.winbar_disabled_filetypes and type(user_config.winbar_disabled_filetypes) ~= 'table' then
+        table.insert(errors, 'winbar_disabled_filetypes must be a table/array')
+    end
+    
     if user_config.git_enabled and type(user_config.git_enabled) ~= 'boolean' then
         table.insert(errors, 'git_enabled must be a boolean')
     end

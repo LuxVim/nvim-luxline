@@ -8,6 +8,7 @@ M.defaults = {
     
     -- Winbar configuration
     winbar_enabled = true,
+    winbar_disabled_filetypes = {},
     left_active_items_winbar = { 'windownumber' },
     left_inactive_items_winbar = { 'windownumber' },
     right_active_items_winbar = { 'filename:tail' },
