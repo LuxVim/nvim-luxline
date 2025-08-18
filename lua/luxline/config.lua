@@ -91,4 +91,14 @@ function M.export()
     return vim.deepcopy(config)
 end
 
+function M.is_winbar_disabled_for_filetype(filetype)
+    local disabled_filetypes = config.winbar_disabled_filetypes or {}
+    for _, disabled_ft in ipairs(disabled_filetypes) do
+        if disabled_ft == filetype then
+            return true
+        end
+    end
+    return false
+end
+
 return M
