@@ -61,20 +61,7 @@ end
 function M.reload()
     M.reset()
     
-    package.loaded['luxline'] = nil
-    package.loaded['luxline.config'] = nil
-    package.loaded['luxline.rendering.statusline'] = nil
-    package.loaded['luxline.rendering.winbar'] = nil
-    package.loaded['luxline.rendering.highlight'] = nil
-    package.loaded['luxline.rendering.bar_builder'] = nil
-    package.loaded['luxline.themes'] = nil
-    package.loaded['luxline.items'] = nil
-    package.loaded['luxline.integrations.git'] = nil
-    package.loaded['luxline.core.lifecycle'] = nil
-    package.loaded['luxline.core.autocommands'] = nil
-    package.loaded['luxline.core.update_manager'] = nil
-    package.loaded['luxline.debug'] = nil
-    
+    -- Clear all luxline modules
     for module_name, _ in pairs(package.loaded) do
         if module_name:match('^luxline%.') then
             package.loaded[module_name] = nil

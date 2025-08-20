@@ -3,7 +3,6 @@ local M = {}
 local config = require('luxline.config')
 local lifecycle = require('luxline.core.lifecycle')
 local update_manager = require('luxline.core.update_manager')
-local debug = require('luxline.debug')
 local themes = require('luxline.themes')
 
 M.config = config
@@ -18,9 +17,13 @@ M.get_stats = lifecycle.get_stats
 M.update = update_manager.update
 M.throttled_update = update_manager.throttled_update
 
--- Debug functionality delegates
-M.debug = debug.debug
-M.preview_config = debug.preview_config
+-- Debug functionality delegates - lazy load to avoid circular dependency
+M.debug = function()
+    return require('luxline.debug').debug()
+end
+M.preview_config = function(config_override)
+    return require('luxline.debug').preview_config(config_override)
+end
 
 M.set_theme = themes.set_theme
 

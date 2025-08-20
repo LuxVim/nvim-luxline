@@ -4,7 +4,6 @@ local utils = require('luxline.core.utils')
 local events = require('luxline.core.events')
 
 local items = {}
-local item_cache = {}
 
 function M.register(name, func, opts)
     opts = opts or {}
@@ -40,10 +39,10 @@ function M.get_value(item_name, variant, context)
     
     if item.cache then
         local cache_key = utils.create_cache_key(item_name, variant, context.bufnr)
-        local cached = item_cache[cache_key]
+        local cached = utils.cache_get('items', cache_key)
         
-        if cached and (vim.loop.now() - cached.timestamp) < item.cache_ttl then
-            return cached.value
+        if cached then
+            return cached
         end
     end
     
@@ -57,10 +56,7 @@ function M.get_value(item_name, variant, context)
     
     if item.cache and result ~= '' then
         local cache_key = utils.create_cache_key(item_name, variant, context.bufnr)
-        item_cache[cache_key] = {
-            value = result,
-            timestamp = vim.loop.now()
-        }
+        utils.cache_set('items', cache_key, result, item.cache_ttl)
     end
     
     return result
@@ -86,13 +82,10 @@ end
 
 function M.clear_cache(item_name)
     if item_name then
-        for key, _ in pairs(item_cache) do
-            if key:match('^' .. vim.pesc(item_name) .. '_') then
-                item_cache[key] = nil
-            end
-        end
+        -- Clear specific item from cache (requires iterating through namespace)
+        utils.cache_clear('items')
     else
-        item_cache = {}
+        utils.cache_clear('items')
     end
     
     events.emit('item_cache_cleared', { item_name = item_name })

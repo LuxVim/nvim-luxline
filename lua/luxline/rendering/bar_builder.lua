@@ -161,42 +161,51 @@ function M.preview(config_override, bar_type)
     return preview
 end
 
--- Convenience methods for statusline
-function M.build_statusline_for_context(context)
-    return M.build_for_context(context, 'statusline')
-end
+-- Statusline API
+M.statusline = {
+    build_for_context = function(context)
+        return M.build_for_context(context, 'statusline')
+    end,
+    build_section = function(side, status_type, context)
+        return M.build_section(side, status_type, context, 'statusline')
+    end,
+    find_next_valid_item = M.find_next_valid_item,
+    update_all = function()
+        return M.update_all_windows('statusline')
+    end,
+    update_window = function(winid)
+        return M.update_window(winid, 'statusline')
+    end,
+    preview = function(config_override)
+        return M.preview(config_override, 'statusline')
+    end
+}
 
-function M.build_statusline_section(side, status_type, context)
-    return M.build_section(side, status_type, context, 'statusline')
-end
+-- Winbar API
+M.winbar = {
+    build_for_context = function(context)
+        return M.build_for_context(context, 'winbar')
+    end,
+    update_all = function()
+        return M.update_all_windows('winbar')
+    end,
+    update_window = function(winid)
+        return M.update_window(winid, 'winbar')
+    end,
+    preview = function(config_override)
+        return M.preview(config_override, 'winbar')
+    end
+}
 
-function M.update_all_statusline()
-    return M.update_all_windows('statusline')
-end
-
-function M.update_statusline_window(winid)
-    return M.update_window(winid, 'statusline')
-end
-
-function M.preview_statusline(config_override)
-    return M.preview(config_override, 'statusline')
-end
-
--- Convenience methods for winbar
-function M.build_winbar_for_context(context)
-    return M.build_for_context(context, 'winbar')
-end
-
-function M.update_all_winbar()
-    return M.update_all_windows('winbar')
-end
-
-function M.update_winbar_window(winid)
-    return M.update_window(winid, 'winbar')
-end
-
-function M.preview_winbar(config_override)
-    return M.preview(config_override, 'winbar')
-end
+-- Legacy convenience methods for backward compatibility
+M.build_statusline_for_context = M.statusline.build_for_context
+M.build_statusline_section = M.statusline.build_section
+M.update_all_statusline = M.statusline.update_all
+M.update_statusline_window = M.statusline.update_window
+M.preview_statusline = M.statusline.preview
+M.build_winbar_for_context = M.winbar.build_for_context
+M.update_all_winbar = M.winbar.update_all
+M.update_winbar_window = M.winbar.update_window
+M.preview_winbar = M.winbar.preview
 
 return M

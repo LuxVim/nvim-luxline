@@ -101,11 +101,7 @@ function M.split_item_variant(item_spec)
     return name, variant ~= '' and variant or nil
 end
 
-function M.create_context(winid, bufnr)
-    winid = winid or vim.api.nvim_get_current_win()
-    bufnr = bufnr or vim.api.nvim_win_get_buf(winid)
-    local current_win = vim.api.nvim_get_current_win()
-    
+local function create_context_fields(winid, bufnr, current_win)
     return {
         active = winid == current_win,
         winid = winid,
@@ -115,6 +111,14 @@ function M.create_context(winid, bufnr)
         filename = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ':t'),
         cwd = vim.fn.getcwd()
     }
+end
+
+function M.create_context(winid, bufnr)
+    winid = winid or vim.api.nvim_get_current_win()
+    bufnr = bufnr or vim.api.nvim_win_get_buf(winid)
+    local current_win = vim.api.nvim_get_current_win()
+    
+    return create_context_fields(winid, bufnr, current_win)
 end
 
 function M.get_current_context()
@@ -128,14 +132,7 @@ function M.gather_window_info()
     for _, tabpage in ipairs(vim.api.nvim_list_tabpages()) do
         for _, win in ipairs(vim.api.nvim_tabpage_list_wins(tabpage)) do
             local bufnr = vim.api.nvim_win_get_buf(win)
-            windows[win] = {
-                active = win == current_win,
-                bufnr = bufnr,
-                winid = win,  -- Include winid for proper window number calculation
-                filetype = vim.api.nvim_get_option_value('filetype', { buf = bufnr }),
-                buftype = vim.api.nvim_get_option_value('buftype', { buf = bufnr }),
-                filename = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ':t')
-            }
+            windows[win] = create_context_fields(win, bufnr, current_win)
         end
     end
     

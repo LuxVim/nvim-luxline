@@ -49,40 +49,31 @@ function M.validate_theme(theme, name)
     
     theme = utils.deep_merge(defaults, theme)
     
-    -- Handle both old and new theme structures
-    if theme.gradient then
-        -- New structure: use gradient array for both sides
-        if #theme.gradient ~= 7 then
-            vim.notify('Theme gradient must have exactly 7 colors: ' .. (name or 'unknown'), vim.log.levels.WARN)
-            -- Fill missing colors with fallback
-            for i = #theme.gradient + 1, 7 do
-                theme.gradient[i] = theme.fallback
-            end
-        end
-        
-        -- Generate itemLeft/Right from gradient
-        for i = 1, 7 do
-            theme['itemLeft' .. i] = theme.gradient[i] or theme.fallback
-            theme['itemRight' .. i] = theme.gradient[i] or theme.fallback
-        end
-    else
-        -- Legacy structure: validate existing itemLeft/Right
-        local required_sides = { 'Left', 'Right' }
-        for _, side in ipairs(required_sides) do
-            for i = 1, 7 do
-                local key = 'item' .. side .. i
-                if not theme[key] then
-                    local gray_value = math.floor(0x40 + (i - 1) * 0x10)
-                    theme[key] = string.format('#%02x%02x%02x', gray_value, gray_value, gray_value)
-                end
-            end
-        end
-        
-        -- Create gradient array from existing structure for consistency
+    -- Ensure gradient exists and has 7 colors
+    if not theme.gradient then
+        -- Legacy fallback: generate gradient from existing structure or defaults
         theme.gradient = {}
         for i = 1, 7 do
-            theme.gradient[i] = theme['itemLeft' .. i]
+            local left_key = 'itemLeft' .. i
+            if theme[left_key] then
+                theme.gradient[i] = theme[left_key]
+            else
+                local gray_value = math.floor(0x40 + (i - 1) * 0x10)
+                theme.gradient[i] = string.format('#%02x%02x%02x', gray_value, gray_value, gray_value)
+            end
         end
+    elseif #theme.gradient ~= 7 then
+        vim.notify('Theme gradient must have exactly 7 colors: ' .. (name or 'unknown'), vim.log.levels.WARN)
+        -- Fill missing colors with fallback
+        for i = #theme.gradient + 1, 7 do
+            theme.gradient[i] = theme.fallback
+        end
+    end
+    
+    -- Generate itemLeft/Right from gradient for compatibility
+    for i = 1, 7 do
+        theme['itemLeft' .. i] = theme.gradient[i]
+        theme['itemRight' .. i] = theme.gradient[i]
     end
     
     return theme
@@ -188,12 +179,12 @@ function M.preview_theme(theme_name)
     
     if M.set_theme(theme_name) then
         vim.schedule(function()
-            local statusline = require('luxline.rendering.statusline')
-            statusline.update_all()
+            local bar_builder = require('luxline.rendering.bar_builder')
+            bar_builder.statusline.update_all()
             
             vim.defer_fn(function()
                 M.set_theme(old_theme_name)
-                statusline.update_all()
+                bar_builder.statusline.update_all()
             end, 3000)
         end)
     end
@@ -220,14 +211,82 @@ function M.export_theme(theme_name, format)
     return nil
 end
 
+function M.create_theme(name, theme_config)
+    M.register(name, theme_config)
+end
+
 function M.setup()
     require('luxline.themes.base')
     require('luxline.themes.default')
-    require('luxline.themes.lux-vesper')
-    require('luxline.themes.lux-aurora')
-    require('luxline.themes.lux-chroma')
-    require('luxline.themes.lux-eos')
-    require('luxline.themes.lux-umbra')
+    
+    -- Register lux themes using consolidated data
+    local lux_themes = {
+        ['lux-vesper'] = {
+            foreground = '#e0e7ff',
+            fallback = '#4a3674',
+            gradient = {
+                '#0f0f23', '#1a1a2e', '#2A305E', '#4a3674',
+                '#7c3aed', '#8b5cf6', '#a855f7'
+            },
+            middle = '#1a1a2e',
+            semantic = {
+                LuxlineFilename = { fg = '#e0e7ff', bg = '#7c3aed' },
+                LuxlineWinbarFilename = { fg = '#e0e7ff', bg = '#6d28d9' },
+                LuxlineModified = { fg = '#fbbf24', bg = '#dc2626', bold = true },
+                LuxlineWinbarModified = { fg = '#fbbf24', bg = '#b91c1c', bold = true },
+                LuxlineGit = { fg = '#22c55e', bg = '#4a3674' },
+                LuxlineWinbarGit = { fg = '#22c55e', bg = '#3c2e60' },
+                LuxlinePosition = { fg = '#e0e7ff', bg = '#8b5cf6' },
+                LuxlineWinbarPosition = { fg = '#e0e7ff', bg = '#7c3aed' },
+                LuxlinePercent = { fg = '#e0e7ff', bg = '#a855f7' },
+                LuxlineWinbarPercent = { fg = '#e0e7ff', bg = '#9333ea' },
+                LuxlineWindownumber = { fg = '#fbbf24', bg = '#4a3674', bold = true },
+                LuxlineWinbarWindownumber = { fg = '#fbbf24', bg = '#3c2e60', bold = true },
+                LuxlineSpacer = { fg = '#1a1a2e', bg = '#1a1a2e' },
+                LuxlineWinbarSpacer = { fg = '#1a1a2e', bg = '#1a1a2e' }
+            }
+        },
+        ['lux-aurora'] = {
+            foreground = '#1a1a1a',
+            fallback = '#00bfa5',
+            gradient = {
+                '#f2f8f9', '#ecf4f6', '#e0ecef', '#b3e5fc',
+                '#00bfa5', '#00e5ff', '#7c4dff'
+            },
+            middle = '#ecf4f6'
+        },
+        ['lux-chroma'] = {
+            foreground = '#1a1a1a',
+            fallback = '#20b2aa',
+            gradient = {
+                '#fdfbf3', '#faf7ed', '#f4f0e1', '#fffdd0',
+                '#20b2aa', '#ff8c42', '#ff69b4'
+            },
+            middle = '#faf7ed'
+        },
+        ['lux-eos'] = {
+            foreground = '#1a1a1a',
+            fallback = '#ff8e53',
+            gradient = {
+                '#fef4f1', '#fdefeb', '#fbe4df', '#ffab91',
+                '#ff8e53', '#26d0ce', '#ff6b6b'
+            },
+            middle = '#fdefeb'
+        },
+        ['lux-umbra'] = {
+            foreground = '#f4edff',
+            fallback = '#5b3094',
+            gradient = {
+                '#0a0310', '#180c24', '#2c1a42', '#5b3094',
+                '#6b60e3', '#c471ed', '#d776dd'
+            },
+            middle = '#180c24'
+        }
+    }
+    
+    for name, theme_data in pairs(lux_themes) do
+        M.register(name, theme_data)
+    end
     
     events.on('colorscheme_changed', function()
         -- Auto-detect lux themes when colorscheme changes
