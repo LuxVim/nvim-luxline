@@ -77,27 +77,6 @@ function M.build_section(side, status_type, context, bar_type)
     return section
 end
 
-function M.find_next_valid_item(item_list, current_idx, context)
-    for i = current_idx + 1, #item_list do
-        local item_name, variant = utils.split_item_variant(item_list[i])
-        local item_value = items.get_value(item_name, variant, context)
-        if item_value and item_value ~= '' then
-            return i
-        end
-    end
-    return -1
-end
-
-function M.find_previous_valid_item(item_list, current_idx, context)
-    for i = current_idx - 1, 1, -1 do
-        local item_name, variant = utils.split_item_variant(item_list[i])
-        local item_value = items.get_value(item_name, variant, context)
-        if item_value and item_value ~= '' then
-            return i
-        end
-    end
-    return -1
-end
 
 function M.update_all_windows(bar_type)
     bar_type = bar_type or 'statusline'
@@ -169,7 +148,6 @@ M.statusline = {
     build_section = function(side, status_type, context)
         return M.build_section(side, status_type, context, 'statusline')
     end,
-    find_next_valid_item = M.find_next_valid_item,
     update_all = function()
         return M.update_all_windows('statusline')
     end,
@@ -197,15 +175,5 @@ M.winbar = {
     end
 }
 
--- Legacy convenience methods for backward compatibility
-M.build_statusline_for_context = M.statusline.build_for_context
-M.build_statusline_section = M.statusline.build_section
-M.update_all_statusline = M.statusline.update_all
-M.update_statusline_window = M.statusline.update_window
-M.preview_statusline = M.statusline.preview
-M.build_winbar_for_context = M.winbar.build_for_context
-M.update_all_winbar = M.winbar.update_all
-M.update_winbar_window = M.winbar.update_window
-M.preview_winbar = M.winbar.preview
 
 return M

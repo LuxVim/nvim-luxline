@@ -183,7 +183,6 @@ function M.create_theme(name, theme_config)
 end
 
 function M.setup()
-    require('luxline.themes.base')
     require('luxline.themes.default')
     
     -- Register lux themes from external data file

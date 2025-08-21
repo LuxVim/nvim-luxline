@@ -27,63 +27,6 @@ function M.item(value, side, idx, bar_type, item_name)
     return utils.format_highlight(group_name, value)
 end
 
-function M.separator(separator, side, current_idx, next_idx, bar_type)
-    if not separator or separator == '' then
-        return ''
-    end
-    
-    bar_type = bar_type or 'statusline'
-    local cache_key = string.format('%s_%s_%d_%d', bar_type, side, current_idx, next_idx)
-    if separator_cache[cache_key] then
-        return separator_cache[cache_key]
-    end
-    
-    local default_bg = '1A1B26'
-    local winid = vim.api.nvim_get_current_win()
-    local prefix = bar_type == 'winbar' and 'LuxlineWinbarSep' or 'LuxlineSeparator'
-    local hl_name = prefix .. winid .. '_' .. cache_key
-    
-    -- Get actual highlight groups used by items (could be semantic or positional)
-    local current_hl = M.get_item_highlight_group(side, current_idx, bar_type)
-    local next_hl = M.get_item_highlight_group(side, next_idx, bar_type)
-    
-    -- For right side, the logic is reversed since items are in reverse order
-    local fg_bg, bg_bg
-    if side == 'right' then
-        -- Right side: separator fg = next item bg, separator bg = current item bg
-        if next_idx > 0 and next_hl then
-            fg_bg = M.get_highlight_value(next_hl, 'bg')
-        else
-            fg_bg = default_bg
-        end
-        
-        if current_idx > 0 and current_hl then
-            bg_bg = M.get_highlight_value(current_hl, 'bg')
-        else
-            bg_bg = default_bg
-        end
-    else
-        -- Left side: separator fg = current item bg, separator bg = next item bg
-        if current_idx > 0 and current_hl then
-            fg_bg = M.get_highlight_value(current_hl, 'bg')
-        else
-            fg_bg = default_bg
-        end
-        
-        if next_idx > 0 and next_hl then
-            bg_bg = M.get_highlight_value(next_hl, 'bg')
-        else
-            bg_bg = default_bg
-        end
-    end
-    
-    M.create_highlight(hl_name, fg_bg, bg_bg)
-    
-    local result = '%#' .. hl_name .. '#' .. separator
-    separator_cache[cache_key] = result
-    
-    return result
-end
 
 function M.ensure_highlight_exists(strategy_name, group_name, side, idx, bar_type, item_name)
     if active_groups[group_name] then

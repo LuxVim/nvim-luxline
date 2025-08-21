@@ -3,7 +3,6 @@ local M = {}
 local config = require('luxline.config')
 local state = require('luxline.core.state')
 local events = require('luxline.core.events')
-local debounce = require('luxline.core.debounce')
 local commands = require('luxline.integrations.git.commands')
 local parser = require('luxline.integrations.git.parser')
 local cache = require('luxline.integrations.git.cache')

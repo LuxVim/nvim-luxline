@@ -139,27 +139,6 @@ function M.gather_window_info()
     return windows
 end
 
-function M.validate_config_section(config, section, validator)
-    if not config[section] then
-        return {}
-    end
-    
-    local errors = {}
-    for key, expected_type in pairs(validator) do
-        local value = config[section][key]
-        if value ~= nil then
-            local actual_type = type(value)
-            if actual_type ~= expected_type then
-                table.insert(errors, string.format(
-                    '%s.%s expected %s, got %s',
-                    section, key, expected_type, actual_type
-                ))
-            end
-        end
-    end
-    
-    return errors
-end
 
 function M.create_cache_key(item_name, variant, bufnr)
     return string.format('%s_%s_%s', item_name, variant or 'default', bufnr)
