@@ -2,6 +2,7 @@ local M = {}
 
 local utils = require('luxline.core.utils')
 local events = require('luxline.core.events')
+local strategies = require('luxline.rendering.highlight_strategies')
 
 local active_groups = {}
 local separator_cache = {}
@@ -9,22 +10,21 @@ local item_highlight_mappings = {}
 
 function M.item(value, side, idx, bar_type, item_name)
     bar_type = bar_type or 'statusline'
-    local prefix = bar_type == 'winbar' and 'LuxlineWinbar' or 'Luxline'
     
-    -- Use semantic highlight group if item_name is provided and theme defines it
-    local semantic_hl_name = item_name and M.get_semantic_highlight_name(item_name, bar_type)
-    if semantic_hl_name and M.theme_defines_semantic_group(semantic_hl_name) then
-        M.ensure_semantic_highlight_exists(semantic_hl_name, bar_type)
-        -- Store the semantic group for separator logic
-        M.store_item_highlight_mapping(side, idx, bar_type, semantic_hl_name)
-        return utils.format_highlight(semantic_hl_name, value)
+    -- Get the appropriate highlight strategy and group name
+    local strategy_name, group_name = strategies.get_highlight_strategy(item_name, side, idx, bar_type)
+    
+    if not strategy_name or not group_name then
+        return value -- Return plain value if no highlight available
     end
     
-    -- Fallback to positional highlighting
-    local hl_name = prefix .. 'Item' .. side:gsub('^%l', string.upper) .. idx
-    M.ensure_highlight_exists(hl_name, side, idx, bar_type)
-    M.store_item_highlight_mapping(side, idx, bar_type, hl_name)
-    return utils.format_highlight(hl_name, value)
+    -- Ensure the highlight group exists
+    M.ensure_highlight_exists(strategy_name, group_name, side, idx, bar_type, item_name)
+    
+    -- Store the group for separator logic
+    M.store_item_highlight_mapping(side, idx, bar_type, group_name)
+    
+    return utils.format_highlight(group_name, value)
 end
 
 function M.separator(separator, side, current_idx, next_idx, bar_type)
@@ -85,33 +85,24 @@ function M.separator(separator, side, current_idx, next_idx, bar_type)
     return result
 end
 
-function M.ensure_highlight_exists(group_name, side, idx, bar_type)
+function M.ensure_highlight_exists(strategy_name, group_name, side, idx, bar_type, item_name)
     if active_groups[group_name] then
         return group_name
     end
     
-    local themes = require('luxline.themes')
-    local theme = themes.get_current_theme()
+    local hl_def
+    if strategy_name == 'semantic' then
+        hl_def = strategies.create_highlight_group('semantic', group_name, bar_type)
+    elseif strategy_name == 'positional' then
+        hl_def = strategies.create_highlight_group('positional', group_name, side, idx, bar_type)
+    end
     
-    if not theme then
+    if not hl_def then
         vim.notify('No theme available for highlight group: ' .. group_name, vim.log.levels.WARN)
         return group_name
     end
     
-    local bg_key = 'item' .. side:gsub('^%l', string.upper) .. idx
-    local bg = theme[bg_key] or theme.fallback or '#808080'
-    local fg = theme.foreground or '#d0d0d0'
-    
-    -- For winbar, use a slightly darker/lighter bg for distinction
-    if bar_type == 'winbar' then
-        bg = M.adjust_color(bg, -10) -- Slightly darker for winbar
-    end
-    
-    vim.api.nvim_set_hl(0, group_name, {
-        fg = fg,
-        bg = bg,
-    })
-    
+    vim.api.nvim_set_hl(0, group_name, hl_def)
     active_groups[group_name] = true
     return group_name
 end
@@ -138,55 +129,6 @@ function M.create_highlight(name, fg, bg)
     active_groups[name] = true
 end
 
-function M.get_semantic_highlight_name(item_name, bar_type)
-    local prefix = bar_type == 'winbar' and 'LuxlineWinbar' or 'Luxline'
-    return prefix .. item_name:gsub('^%l', string.upper):gsub('_(%l)', string.upper)
-end
-
-function M.theme_defines_semantic_group(group_name)
-    local themes = require('luxline.themes')
-    local theme = themes.get_current_theme()
-    
-    if not theme then
-        return false
-    end
-    
-    -- Check if theme has semantic groups defined
-    return theme.semantic and theme.semantic[group_name] ~= nil
-end
-
-function M.ensure_semantic_highlight_exists(group_name, bar_type)
-    if active_groups[group_name] then
-        return group_name
-    end
-    
-    local themes = require('luxline.themes')
-    local theme = themes.get_current_theme()
-    
-    if not theme or not theme.semantic or not theme.semantic[group_name] then
-        return group_name
-    end
-    
-    local semantic_def = theme.semantic[group_name]
-    local fg = semantic_def.fg or theme.foreground or '#d0d0d0'
-    local bg = semantic_def.bg or theme.fallback or '#808080'
-    
-    -- For winbar, use a slightly darker/lighter bg for distinction
-    if bar_type == 'winbar' then
-        bg = M.adjust_color(bg, -10)
-    end
-    
-    vim.api.nvim_set_hl(0, group_name, {
-        fg = fg,
-        bg = bg,
-        bold = semantic_def.bold,
-        italic = semantic_def.italic,
-        underline = semantic_def.underline,
-    })
-    
-    active_groups[group_name] = true
-    return group_name
-end
 
 function M.store_item_highlight_mapping(side, idx, bar_type, highlight_group)
     local winid = vim.api.nvim_get_current_win()
@@ -205,23 +147,11 @@ function M.get_item_highlight_group(side, idx, bar_type)
 end
 
 function M.get_item_highlight_group_name(item_name, bar_type, rendered_idx, side)
-    if not item_name then
-        return nil
-    end
+    local strategy_name, group_name = strategies.get_highlight_strategy(item_name, side, rendered_idx, bar_type)
     
-    -- Try semantic name first
-    local semantic_hl_name = M.get_semantic_highlight_name(item_name, bar_type)
-    if semantic_hl_name and M.theme_defines_semantic_group(semantic_hl_name) then
-        M.ensure_semantic_highlight_exists(semantic_hl_name, bar_type)
-        return semantic_hl_name
-    end
-    
-    -- Fallback to positional highlighting if semantic is not available
-    if rendered_idx and side then
-        local prefix = bar_type == 'winbar' and 'LuxlineWinbar' or 'Luxline'
-        local hl_name = prefix .. 'Item' .. side:gsub('^%l', string.upper) .. rendered_idx
-        M.ensure_highlight_exists(hl_name, side, rendered_idx, bar_type)
-        return hl_name
+    if strategy_name and group_name then
+        M.ensure_highlight_exists(strategy_name, group_name, side, rendered_idx, bar_type, item_name)
+        return group_name
     end
     
     return nil
@@ -239,37 +169,19 @@ function M.separator_direct(separator, side, current_hl_group, next_hl_group, ba
     end
     
     bar_type = bar_type or 'statusline'
-    local current_name = current_hl_group or 'default'
-    local next_name = next_hl_group or 'default'
-    local cache_key = string.format('%s_%s_%s_%s', bar_type, side, current_name, next_name)
+    local cache_key = string.format('%s_%s_%s_%s', bar_type, side, 
+                                    current_hl_group or 'default', 
+                                    next_hl_group or 'default')
     
     if separator_cache[cache_key] then
         return separator_cache[cache_key]
     end
     
-    local default_bg = '1A1B26'
-    local winid = vim.api.nvim_get_current_win()
-    local prefix = bar_type == 'winbar' and 'LuxlineWinbarSep' or 'LuxlineSeparator'
-    local hl_name = prefix .. winid .. '_' .. cache_key
+    local sep_info = strategies.create_separator_highlight(separator, side, current_hl_group, next_hl_group, bar_type)
+    active_groups[sep_info.group_name] = true
     
-    -- Get background colors from the actual highlight groups
-    local fg_bg, bg_bg
-    if side == 'right' then
-        -- Right side: separator fg = next item bg, separator bg = current item bg
-        fg_bg = next_hl_group and M.get_highlight_value(next_hl_group, 'bg') or default_bg
-        bg_bg = current_hl_group and M.get_highlight_value(current_hl_group, 'bg') or default_bg
-    else
-        -- Left side: separator fg = current item bg, separator bg = next item bg
-        fg_bg = current_hl_group and M.get_highlight_value(current_hl_group, 'bg') or default_bg
-        bg_bg = next_hl_group and M.get_highlight_value(next_hl_group, 'bg') or default_bg
-    end
-    
-    M.create_highlight(hl_name, fg_bg, bg_bg)
-    
-    local result = '%#' .. hl_name .. '#' .. separator
-    separator_cache[cache_key] = result
-    
-    return result
+    separator_cache[cache_key] = sep_info.formatted
+    return sep_info.formatted
 end
 
 function M.clear_cache()
@@ -300,20 +212,7 @@ function M.get_active_groups()
     return vim.tbl_keys(active_groups)
 end
 
-function M.adjust_color(color, amount)
-    if not color or not color:match('^#') then
-        return color
-    end
-    
-    local r = tonumber(color:sub(2, 3), 16)
-    local g = tonumber(color:sub(4, 5), 16)
-    local b = tonumber(color:sub(6, 7), 16)
-    
-    r = math.max(0, math.min(255, r + amount))
-    g = math.max(0, math.min(255, g + amount))
-    b = math.max(0, math.min(255, b + amount))
-    
-    return string.format('#%02x%02x%02x', r, g, b)
-end
+-- Delegate to strategies module
+M.adjust_color = strategies.adjust_color
 
 return M
