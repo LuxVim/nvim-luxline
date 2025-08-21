@@ -5,7 +5,7 @@
   nvim-luxline
 </h1>
 
-A highly customizable statusline and winbar plugin for Neovim, featuring intelligent item loading, gradient-based theming, git integration, and context-aware configurations designed for modern development workflows.
+A highly customizable statusline and winbar for Neovim, featuring intelligent item loading, gradient-based theming, git integration, and context-aware configurations designed for modern development workflows.
 
 ---
 
