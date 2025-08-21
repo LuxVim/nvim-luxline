@@ -1,77 +1,72 @@
-# nvim-luxline
+<h1 align="left">
+  <img src="https://github.com/user-attachments/assets/546ee0e5-30fd-4e37-b219-e390be8b1c6e"
+       alt="LuxVim Logo"
+       style="width: 40px; height: 40px; position: relative; top: 6px; margin-right: 10px;" />
+  nvim-luxline
+</h1>
 
-**A highly optimized, modular statusline and winbar plugin for Neovim**
-
-*Built with performance, extensibility, and developer experience in mind*
+A highly customizable statusline and winbar plugin for Neovim, featuring intelligent item loading, gradient-based theming, git integration, and context-aware configurations designed for modern development workflows.
 
 ---
 
-## 🚀 Key Features
+## ✨ Features
 
-### **Optimized Architecture (v2.0)**
-- **35% code reduction** through pattern abstraction and modular design
-- **Schema-driven configuration** with automatic validation and type safety
-- **Strategy-based highlight system** eliminating code duplication
-- **Reusable item base patterns** for rapid development
+- **Dual-Bar Architecture**
+  - Independent statusline and winbar configurations
+  - Context-aware item selection based on filetype and buffer type
+  - Flexible item positioning with separator customization
+  - Winbar can be disabled per filetype for optimal workflow
 
-### **Dual-Bar System**
-- Independent **statusline** and **winbar** with context-aware item selection
-- **Filetype/buftype specificity** - different configurations per file type
-- **Performance-optimized** rendering with intelligent caching and throttling
-- **Flexible item positioning** with customizable separators
+- **Intelligent Item System**
+  - Auto-discovery of statusline items with variant support
+  - Comprehensive built-in items (file, git, position, encoding)
+  - Extensible item registration with caching and async support
+  - Rich context passed to items (buffer, window, filetype data)
 
-### **Advanced Item System**
-- **Auto-discovery** of items with variant support (`filename:tail`, `modified:icon`)
-- **Base patterns** for common item types (buffer options, file paths, encoding)
-- **Rich context** passed to items (buffer, window, filetype, active state)
-- **Intelligent caching** with configurable TTL per item
+- **Advanced Theming**
+  - Gradient-based theme system with 7-color transitions
+  - Built-in lux colorscheme integration and auto-detection
+  - Custom theme creation with color interpolation helpers
+  - Semantic highlighting with positional fallback
 
-### **Professional Theming**
-- **5 built-in lux themes** with gradient-based 7-color transitions
-- **Automatic theme detection** for lux colorschemes
-- **Custom theme creation** with color interpolation helpers
-- **Semantic highlighting** with positional fallback
+- **Performance Optimized**
+  - Intelligent caching with configurable TTL per item
+  - Throttled updates to prevent excessive rendering
+  - Debounced git operations with smart repository caching
+  - Hot-reload capability for development workflows
 
-### **Git Integration**
-- **Async git operations** with debounced updates for performance
-- **Smart repository caching** with configurable timeouts
-- **Branch and diff statistics** with visual indicators
-- **Multi-repository support** with per-repo state management
+- **Git Integration**
+  - Async git operations with debounced updates for performance
+  - Smart repository caching with configurable timeouts
+  - Branch and diff statistics with visual indicators
+  - Multi-repository support with per-repo state management
 
-### **Developer Experience**
-- **Hot-reload capability** for live development
-- **Comprehensive debugging** tools and statistics
-- **Event-driven architecture** for loose coupling
-- **Extensive API** for customization and extension
+- **Compatibility**
+  - Neovim 0.5.0+ required (uses modern Lua APIs)
+  - Cross-platform support (Linux, macOS, Windows)
+  - No external dependencies required
 
 ---
 
 ## 📦 Installation
 
-### **Using [lazy.nvim](https://github.com/folke/lazy.nvim)**
+### **using lazy.nvim**
 ```lua
 {
   "LuxVim/nvim-luxline",
   config = function()
     require("luxline").setup({
-      -- Statusline configuration
+      -- Optional configuration
       left_active_items = { 'windownumber', 'filename', 'modified' },
       right_active_items = { 'position', 'filetype', 'encoding' },
-      
-      -- Winbar configuration
       winbar_enabled = true,
-      left_active_items_winbar = { 'windownumber' },
-      right_active_items_winbar = { 'filename:tail' },
-      
-      -- Performance and theme
       default_theme = 'lux-vesper',
-      update_throttle = 20,
     })
   end
 }
 ```
 
-### **Using [packer.nvim](https://github.com/wbthomason/packer.nvim)**
+### **using packer.nvim**
 ```lua
 use {
   "LuxVim/nvim-luxline",
@@ -81,108 +76,17 @@ use {
 }
 ```
 
-### **Manual Setup**
+### **using vim-plug**
+```vim
+Plug 'LuxVim/nvim-luxline'
+```
+
+Then in your `init.lua`:
 ```lua
 require("luxline").setup({
   -- Your configuration here
 })
 ```
-
----
-
-## ⚡ Quick Start
-
-### **Minimal Setup**
-```lua
-require("luxline").setup()
-```
-
-### **Recommended Setup**
-```lua
-require("luxline").setup({
-  left_active_items = { 'windownumber', 'filename', 'modified' },
-  right_active_items = { 'position', 'filetype', 'encoding' },
-  winbar_enabled = true,
-  default_theme = 'lux-vesper',
-})
-```
-
-### **Performance Optimized**
-```lua
-require("luxline").setup({
-  left_active_items = { 'filename:tail', 'modified' },
-  right_active_items = { 'position' },
-  winbar_enabled = false,
-  git_enabled = false,
-  update_throttle = 50,
-})
-```
-
----
-
-## 🏗️ Architecture (v2.0 Optimizations)
-
-nvim-luxline has been completely rewritten with a focus on **code reduction** and **performance optimization** while maintaining full backward compatibility.
-
-### **Key Improvements**
-- **35% code reduction** through strategic refactoring
-- **Unified configuration schema** with automatic validation
-- **Strategy-based highlight system** eliminating duplication
-- **Modular item base patterns** for reusable components
-- **Centralized theme management** with data separation
-
-### **Module Structure**
-```
-lua/luxline/
-├── init.lua                 # Enhanced API with new features
-├── core/                    # Core engine (optimized)
-│   ├── lifecycle.lua        # Plugin lifecycle management
-│   ├── state.lua           # Centralized state management
-│   ├── events.lua          # Event-driven architecture
-│   ├── update_manager.lua  # Throttled update system
-│   └── utils.lua           # Common utilities
-├── config/                  # Schema-driven configuration
-│   ├── defaults.lua        # Default values
-│   ├── schema.lua          # ✨ NEW: Unified schema system
-│   └── validation.lua      # ✨ OPTIMIZED: Simplified validation
-├── items/                   # Item system (90% reduction)
-│   ├── base.lua            # ✨ NEW: Reusable base patterns
-│   └── *.lua               # Individual items (dramatically simplified)
-├── rendering/               # Rendering system (40% reduction)
-│   ├── bar_builder.lua     # Bar construction
-│   ├── highlight.lua       # ✨ OPTIMIZED: Highlight management
-│   └── highlight_strategies.lua # ✨ NEW: Strategy pattern
-├── themes/                  # Theme system (35% reduction)
-│   ├── init.lua            # ✨ OPTIMIZED: Theme management
-│   ├── validation.lua      # ✨ NEW: Theme validation
-│   └── data/               # ✨ NEW: External theme data
-└── integrations/           # External integrations
-    └── git/                # Git integration with caching
-```
-
-### **New Base Patterns**
-Create items efficiently using base patterns:
-
-```lua
-local base = require("luxline.items.base")
-
--- Buffer option items (modified, readonly, etc.)
-base.create_buffer_option_item('my_option', 'option_name', {
-  variants = { short = function(value) return value and "+" or "" end }
-})
-
--- File path items (filename, cwd, etc.)
-base.create_file_path_item('my_file', {
-  variants = { custom = function(path) return "[" .. path .. "]" end }
-})
-
--- Encoding items
-base.create_encoding_item('my_encoding', {
-  short_names = { ['utf-8'] = 'U8' }
-})
-```
-
----
 
 ## 🛠️ Configuration
 
@@ -251,11 +155,10 @@ require("luxline").setup({
 | `filename` | Current file name | `full`, `relative`, `tail` | `filename:relative` |
 | `filetype` | File type | `icon` (requires nvim-web-devicons) | `filetype:icon` |
 | `cwd` | Current working directory | `full`, `short` | `cwd:short` |
-| `modified` | File modification indicator | - | `modified` |
-| `readonly` | Read-only file indicator | - | `readonly` |
-| `encoding` | File encoding | - | `encoding` |
-| `position` | Line and column position | - | `position` |
-| `percent` | Percentage through file | - | `percent` |
+| `modified` | File modification indicator | `icon`, `short` | `modified:icon` |
+| `readonly` | Read-only file indicator | `icon`, `short` | `readonly:icon` |
+| `encoding` | File encoding | `short` | `encoding:short` |
+| `position` | Line and column position | `line`, `column` | `position:line` |
 | `windownumber` | Window number | - | `windownumber` |
 | `git` | Git branch and status | - | `git` |
 | `spacer` | Flexible space for alignment | - | `spacer` |
@@ -269,6 +172,7 @@ require("luxline").setup({
   left_active_items = { 
     'filename:relative',     -- Show relative file path
     'filetype:icon',         -- Show filetype with icon
+    'modified:icon',         -- Show as icon (●)
     'cwd:short'             -- Show shortened working directory
   },
   right_active_items_winbar = { 'filename:tail' }  -- Show only filename in winbar
@@ -514,7 +418,7 @@ require("luxline").setup({
 
 ## 🙏 Acknowledgments
 
-nvim-luxline is part of the [LuxVim](https://github.com/luxvim/LuxVim) ecosystem - a high-performance Neovim distribution focused on modern UI design and developer productivity.
+nvim-luxline is part of the [LuxVim](https://github.com/LuxVim/LuxVim) ecosystem - a high-performance Neovim distribution focused on modern UI design and developer productivity.
 
 ---
 
