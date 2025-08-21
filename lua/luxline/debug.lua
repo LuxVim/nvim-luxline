@@ -1,11 +1,11 @@
 local M = {}
 
-local statusline = require('luxline.rendering.statusline')
+local bar_builder = require('luxline.rendering.bar_builder')
 local items = require('luxline.items')
 local themes = require('luxline.themes')
 
 function M.preview_config(config_override)
-    return statusline.preview(config_override)
+    return bar_builder.statusline.preview(config_override)
 end
 
 function M.debug()

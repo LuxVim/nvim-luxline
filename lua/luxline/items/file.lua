@@ -1,21 +1,13 @@
+local base = require('luxline.items.base')
 local items = require('luxline.items')
 
-items.register('filename', function(variant, context)
-    local filename = context and context.filename or vim.fn.expand('%:t')
-    
-    if variant == 'full' then
-        return vim.fn.expand('%:p')
-    elseif variant == 'relative' then
-        return vim.fn.expand('%:~:.')
-    elseif variant == 'tail' then
-        return filename
-    else
-        return filename ~= '' and filename or '[No Name]'
-    end
-end, {
+base.create_file_path_item('filename', {
     description = "Current file name",
-    category = "file",
-    variants = { 'full', 'relative', 'tail' }
+    variants = {
+        full = function() return vim.fn.expand('%:p') end,
+        relative = function() return vim.fn.expand('%:~:.') end,
+        tail = function(filename) return filename end
+    }
 })
 
 items.register('filetype', function(variant, context)
@@ -36,7 +28,6 @@ end, {
     category = "file",
     variants = { 'icon' }
 })
-
 
 items.register('cwd', function(variant, context)
     local cwd = context and context.cwd or vim.fn.getcwd()

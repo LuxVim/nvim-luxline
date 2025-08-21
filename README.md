@@ -5,7 +5,7 @@
   nvim-luxline
 </h1>
 
-A highly customizable, performant statusline and winbar for Neovim. Features intelligent item loading, gradient-based theming, git integration, and context-aware configurations designed for modern development workflows.
+A highly customizable statusline and winbar plugin for Neovim, featuring intelligent item loading, gradient-based theming, git integration, and context-aware configurations designed for modern development workflows.
 
 ---
 
@@ -27,13 +27,19 @@ A highly customizable, performant statusline and winbar for Neovim. Features int
   - Gradient-based theme system with 7-color transitions
   - Built-in lux colorscheme integration and auto-detection
   - Custom theme creation with color interpolation helpers
-  - Legacy theme format support for compatibility
+  - Semantic highlighting with positional fallback
 
 - **Performance Optimized**
   - Intelligent caching with configurable TTL per item
   - Throttled updates to prevent excessive rendering
   - Debounced git operations with smart repository caching
   - Hot-reload capability for development workflows
+
+- **Git Integration**
+  - Async git operations with debounced updates for performance
+  - Smart repository caching with configurable timeouts
+  - Branch and diff statistics with visual indicators
+  - Multi-repository support with per-repo state management
 
 - **Compatibility**
   - Neovim 0.5.0+ required (uses modern Lua APIs)
@@ -47,7 +53,7 @@ A highly customizable, performant statusline and winbar for Neovim. Features int
 ### **using lazy.nvim**
 ```lua
 {
-  "luxvim/nvim-luxline",
+  "LuxVim/nvim-luxline",
   config = function()
     require("luxline").setup({
       -- Optional configuration
@@ -63,7 +69,7 @@ A highly customizable, performant statusline and winbar for Neovim. Features int
 ### **using packer.nvim**
 ```lua
 use {
-  "luxvim/nvim-luxline",
+  "LuxVim/nvim-luxline",
   config = function()
     require("luxline").setup()
   end
@@ -72,7 +78,7 @@ use {
 
 ### **using vim-plug**
 ```vim
-Plug 'luxvim/nvim-luxline'
+Plug 'LuxVim/nvim-luxline'
 ```
 
 Then in your `init.lua`:
@@ -81,8 +87,6 @@ require("luxline").setup({
   -- Your configuration here
 })
 ```
-
----
 
 ## 🛠️ Configuration
 
@@ -151,11 +155,10 @@ require("luxline").setup({
 | `filename` | Current file name | `full`, `relative`, `tail` | `filename:relative` |
 | `filetype` | File type | `icon` (requires nvim-web-devicons) | `filetype:icon` |
 | `cwd` | Current working directory | `full`, `short` | `cwd:short` |
-| `modified` | File modification indicator | - | `modified` |
-| `readonly` | Read-only file indicator | - | `readonly` |
-| `encoding` | File encoding | - | `encoding` |
-| `position` | Line and column position | - | `position` |
-| `percent` | Percentage through file | - | `percent` |
+| `modified` | File modification indicator | `icon`, `short` | `modified:icon` |
+| `readonly` | Read-only file indicator | `icon`, `short` | `readonly:icon` |
+| `encoding` | File encoding | `short` | `encoding:short` |
+| `position` | Line and column position | `line`, `column` | `position:line` |
 | `windownumber` | Window number | - | `windownumber` |
 | `git` | Git branch and status | - | `git` |
 | `spacer` | Flexible space for alignment | - | `spacer` |
@@ -169,6 +172,7 @@ require("luxline").setup({
   left_active_items = { 
     'filename:relative',     -- Show relative file path
     'filetype:icon',         -- Show filetype with icon
+    'modified:icon',         -- Show as icon (●)
     'cwd:short'             -- Show shortened working directory
   },
   right_active_items_winbar = { 'filename:tail' }  -- Show only filename in winbar
@@ -414,7 +418,7 @@ require("luxline").setup({
 
 ## 🙏 Acknowledgments
 
-nvim-luxline is part of the [LuxVim](https://github.com/luxvim/LuxVim) ecosystem - a high-performance Neovim distribution focused on modern UI design and developer productivity.
+nvim-luxline is part of the [LuxVim](https://github.com/LuxVim/LuxVim) ecosystem - a high-performance Neovim distribution focused on modern UI design and developer productivity.
 
 ---
 

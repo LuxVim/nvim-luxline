@@ -42,50 +42,8 @@ function M.get_current_theme()
 end
 
 function M.validate_theme(theme, name)
-    local defaults = {
-        foreground = '#d0d0d0',
-        fallback = '#808080'
-    }
-    
-    theme = utils.deep_merge(defaults, theme)
-    
-    -- Handle both old and new theme structures
-    if theme.gradient then
-        -- New structure: use gradient array for both sides
-        if #theme.gradient ~= 7 then
-            vim.notify('Theme gradient must have exactly 7 colors: ' .. (name or 'unknown'), vim.log.levels.WARN)
-            -- Fill missing colors with fallback
-            for i = #theme.gradient + 1, 7 do
-                theme.gradient[i] = theme.fallback
-            end
-        end
-        
-        -- Generate itemLeft/Right from gradient
-        for i = 1, 7 do
-            theme['itemLeft' .. i] = theme.gradient[i] or theme.fallback
-            theme['itemRight' .. i] = theme.gradient[i] or theme.fallback
-        end
-    else
-        -- Legacy structure: validate existing itemLeft/Right
-        local required_sides = { 'Left', 'Right' }
-        for _, side in ipairs(required_sides) do
-            for i = 1, 7 do
-                local key = 'item' .. side .. i
-                if not theme[key] then
-                    local gray_value = math.floor(0x40 + (i - 1) * 0x10)
-                    theme[key] = string.format('#%02x%02x%02x', gray_value, gray_value, gray_value)
-                end
-            end
-        end
-        
-        -- Create gradient array from existing structure for consistency
-        theme.gradient = {}
-        for i = 1, 7 do
-            theme.gradient[i] = theme['itemLeft' .. i]
-        end
-    end
-    
-    return theme
+    local validation = require('luxline.themes.validation')
+    return validation.validate_theme(theme, name)
 end
 
 function M.set_theme(theme_name)
@@ -188,12 +146,12 @@ function M.preview_theme(theme_name)
     
     if M.set_theme(theme_name) then
         vim.schedule(function()
-            local statusline = require('luxline.rendering.statusline')
-            statusline.update_all()
+            local bar_builder = require('luxline.rendering.bar_builder')
+            bar_builder.statusline.update_all()
             
             vim.defer_fn(function()
                 M.set_theme(old_theme_name)
-                statusline.update_all()
+                bar_builder.statusline.update_all()
             end, 3000)
         end)
     end
@@ -220,14 +178,19 @@ function M.export_theme(theme_name, format)
     return nil
 end
 
+function M.create_theme(name, theme_config)
+    M.register(name, theme_config)
+end
+
 function M.setup()
-    require('luxline.themes.base')
     require('luxline.themes.default')
-    require('luxline.themes.lux-vesper')
-    require('luxline.themes.lux-aurora')
-    require('luxline.themes.lux-chroma')
-    require('luxline.themes.lux-eos')
-    require('luxline.themes.lux-umbra')
+    
+    -- Register lux themes from external data file
+    local lux_themes = require('luxline.themes.data.lux-themes')
+    
+    for name, theme_data in pairs(lux_themes) do
+        M.register(name, theme_data)
+    end
     
     events.on('colorscheme_changed', function()
         -- Auto-detect lux themes when colorscheme changes

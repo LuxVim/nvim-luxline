@@ -23,15 +23,16 @@ function M.get()
 end
 
 function M.get_items(side, status, filetype, bar_type, buftype)
-    local key = side .. '_' .. status .. '_items'
+    local schema = require('luxline.config.schema')
+    local base_key = schema.build_config_key({side, status, 'items'})
     
     if bar_type and bar_type ~= 'statusline' then
-        key = key .. '_' .. bar_type
+        base_key = base_key .. '_' .. bar_type
     end
     
     -- Check buftype first (higher priority for winbar)
     if buftype and buftype ~= '' then
-        local buftype_key = key .. '_buftype_' .. buftype
+        local buftype_key = base_key .. '_buftype_' .. buftype
         if config[buftype_key] then
             return vim.deepcopy(config[buftype_key])
         end
@@ -39,21 +40,22 @@ function M.get_items(side, status, filetype, bar_type, buftype)
     
     -- Then check filetype
     if filetype then
-        local filetype_key = key .. '_' .. filetype
+        local filetype_key = base_key .. '_' .. filetype
         if config[filetype_key] then
             return vim.deepcopy(config[filetype_key])
         end
     end
     
-    return vim.deepcopy(config[key] ~= nil and config[key] or defaults[key])
+    return vim.deepcopy(config[base_key] ~= nil and config[base_key] or defaults[base_key])
 end
 
 function M.get_separator(side, bar_type)
-    local key = side .. '_separator'
+    local schema = require('luxline.config.schema')
+    local base_key = schema.build_config_key({side, 'separator'})
     
     -- Check for bar_type-specific separator first
     if bar_type then
-        local specific_key = side .. '_separator_' .. bar_type
+        local specific_key = base_key .. '_' .. bar_type
         local specific_separator = config[specific_key] or defaults[specific_key]
         if specific_separator ~= nil then
             return specific_separator
@@ -61,12 +63,13 @@ function M.get_separator(side, bar_type)
     end
     
     -- Fall back to default separator
-    local fallback = config[key] or defaults[key]
+    local fallback = config[base_key] or defaults[base_key]
     return fallback
 end
 
 function M.update_item_config(side, status, items_list, filetype)
-    local key = side .. '_' .. status .. '_items'
+    local schema = require('luxline.config.schema')
+    local key = schema.build_config_key({side, status, 'items'})
     if filetype then
         key = key .. '_' .. filetype
     end

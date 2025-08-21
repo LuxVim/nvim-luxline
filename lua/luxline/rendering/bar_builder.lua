@@ -77,27 +77,6 @@ function M.build_section(side, status_type, context, bar_type)
     return section
 end
 
-function M.find_next_valid_item(item_list, current_idx, context)
-    for i = current_idx + 1, #item_list do
-        local item_name, variant = utils.split_item_variant(item_list[i])
-        local item_value = items.get_value(item_name, variant, context)
-        if item_value and item_value ~= '' then
-            return i
-        end
-    end
-    return -1
-end
-
-function M.find_previous_valid_item(item_list, current_idx, context)
-    for i = current_idx - 1, 1, -1 do
-        local item_name, variant = utils.split_item_variant(item_list[i])
-        local item_value = items.get_value(item_name, variant, context)
-        if item_value and item_value ~= '' then
-            return i
-        end
-    end
-    return -1
-end
 
 function M.update_all_windows(bar_type)
     bar_type = bar_type or 'statusline'
@@ -161,42 +140,40 @@ function M.preview(config_override, bar_type)
     return preview
 end
 
--- Convenience methods for statusline
-function M.build_statusline_for_context(context)
-    return M.build_for_context(context, 'statusline')
-end
+-- Statusline API
+M.statusline = {
+    build_for_context = function(context)
+        return M.build_for_context(context, 'statusline')
+    end,
+    build_section = function(side, status_type, context)
+        return M.build_section(side, status_type, context, 'statusline')
+    end,
+    update_all = function()
+        return M.update_all_windows('statusline')
+    end,
+    update_window = function(winid)
+        return M.update_window(winid, 'statusline')
+    end,
+    preview = function(config_override)
+        return M.preview(config_override, 'statusline')
+    end
+}
 
-function M.build_statusline_section(side, status_type, context)
-    return M.build_section(side, status_type, context, 'statusline')
-end
+-- Winbar API
+M.winbar = {
+    build_for_context = function(context)
+        return M.build_for_context(context, 'winbar')
+    end,
+    update_all = function()
+        return M.update_all_windows('winbar')
+    end,
+    update_window = function(winid)
+        return M.update_window(winid, 'winbar')
+    end,
+    preview = function(config_override)
+        return M.preview(config_override, 'winbar')
+    end
+}
 
-function M.update_all_statusline()
-    return M.update_all_windows('statusline')
-end
-
-function M.update_statusline_window(winid)
-    return M.update_window(winid, 'statusline')
-end
-
-function M.preview_statusline(config_override)
-    return M.preview(config_override, 'statusline')
-end
-
--- Convenience methods for winbar
-function M.build_winbar_for_context(context)
-    return M.build_for_context(context, 'winbar')
-end
-
-function M.update_all_winbar()
-    return M.update_all_windows('winbar')
-end
-
-function M.update_winbar_window(winid)
-    return M.update_window(winid, 'winbar')
-end
-
-function M.preview_winbar(config_override)
-    return M.preview(config_override, 'winbar')
-end
 
 return M
