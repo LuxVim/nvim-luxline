@@ -104,6 +104,36 @@ local function build_semantic(gradient)
     return semantic
 end
 
+function M.generate(colorscheme_name)
+    colorscheme_name = colorscheme_name or vim.g.colors_name or 'default'
+
+    if theme_cache[colorscheme_name] then
+        return theme_cache[colorscheme_name]
+    end
+
+    local gradient = build_gradient()
+    local semantic = build_semantic(gradient)
+
+    local theme = {
+        gradient = gradient,
+        middle = gradient[2].bg,
+        semantic = semantic,
+    }
+
+    theme_cache[colorscheme_name] = theme
+    return theme
+end
+
+function M.invalidate(colorscheme_name)
+    if colorscheme_name then
+        theme_cache[colorscheme_name] = nil
+    end
+end
+
+function M.invalidate_all()
+    theme_cache = {}
+end
+
 M._build_gradient = build_gradient
 M._build_semantic = build_semantic
 
