@@ -62,6 +62,49 @@ local function build_gradient()
     return gradient
 end
 
+local SEMANTIC_MAPPING = {
+    LuxlineFilename = { primary = 'Title', fallback_pos = 5 },
+    LuxlineWinbarFilename = { primary = 'Title', fallback_pos = 4 },
+    LuxlineModified = { primary = 'DiagnosticWarn', fallbacks = { 'WarningMsg' }, bold = true },
+    LuxlineWinbarModified = { primary = 'DiagnosticWarn', fallbacks = { 'WarningMsg' }, bold = true },
+    LuxlineGit = { primary = 'GitSignsAdd', fallbacks = { 'DiffAdd', 'String' } },
+    LuxlineWinbarGit = { primary = 'GitSignsAdd', fallbacks = { 'DiffAdd', 'String' } },
+    LuxlinePosition = { primary = 'StatusLine', fallback_pos = 5 },
+    LuxlineWinbarPosition = { primary = 'WinBar', fallback_pos = 4 },
+    LuxlinePercent = { primary = 'Search', fallback_pos = 6 },
+    LuxlineWinbarPercent = { primary = 'IncSearch', fallback_pos = 5 },
+    LuxlineWindownumber = { primary = 'Title', fallback_pos = 3, bold = true },
+    LuxlineWinbarWindownumber = { primary = 'WinBar', fallback_pos = 2, bold = true },
+    LuxlineSpacer = { primary = 'StatusLine', fallback_pos = 2 },
+    LuxlineWinbarSpacer = { primary = 'WinBar', fallback_pos = 2 },
+}
+
+local function build_semantic(gradient)
+    local semantic = {}
+
+    for group_name, mapping in pairs(SEMANTIC_MAPPING) do
+        local colors = get_color_with_fallbacks(mapping.primary, mapping.fallbacks, 'bg', nil)
+        local bg = colors.bg
+        local fg = colors.fg
+
+        if not bg and mapping.fallback_pos and gradient[mapping.fallback_pos] then
+            bg = gradient[mapping.fallback_pos].bg
+            fg = fg or gradient[mapping.fallback_pos].fg
+        end
+
+        if bg then
+            semantic[group_name] = {
+                bg = bg,
+                fg = fg or gradient[1].fg or '#d0d0d0',
+                bold = mapping.bold,
+            }
+        end
+    end
+
+    return semantic
+end
+
 M._build_gradient = build_gradient
+M._build_semantic = build_semantic
 
 return M
