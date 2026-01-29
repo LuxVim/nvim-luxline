@@ -22,20 +22,19 @@ highlight_strategies.semantic = {
     create_highlight = function(group_name, bar_type)
         local themes = require('luxline.themes')
         local theme = themes.get_current_theme()
-        
+
         if not theme or not theme.semantic or not theme.semantic[group_name] then
             return nil
         end
-        
+
         local semantic_def = theme.semantic[group_name]
-        local fg = semantic_def.fg or theme.foreground or '#d0d0d0'
-        local bg = semantic_def.bg or theme.fallback or '#808080'
-        
-        -- For winbar, use a slightly darker/lighter bg for distinction
+        local fg = semantic_def.fg or (theme.gradient[1] and theme.gradient[1].fg) or '#d0d0d0'
+        local bg = semantic_def.bg or (theme.gradient[4] and theme.gradient[4].bg) or '#808080'
+
         if bar_type == 'winbar' then
             bg = M.adjust_color(bg, -10)
         end
-        
+
         return {
             fg = fg,
             bg = bg,
@@ -61,20 +60,25 @@ highlight_strategies.positional = {
     create_highlight = function(group_name, side, idx, bar_type)
         local themes = require('luxline.themes')
         local theme = themes.get_current_theme()
-        
-        if not theme then
+
+        if not theme or not theme.gradient then
             return nil
         end
-        
-        local bg_key = 'item' .. side:gsub('^%l', string.upper) .. idx
-        local bg = theme[bg_key] or theme.fallback or '#808080'
-        local fg = theme.foreground or '#d0d0d0'
-        
-        -- For winbar, use a slightly darker/lighter bg for distinction
+
+        local gradient_idx = math.min(idx, #theme.gradient)
+        local entry = theme.gradient[gradient_idx]
+
+        if not entry then
+            return nil
+        end
+
+        local bg = entry.bg or '#808080'
+        local fg = entry.fg or '#d0d0d0'
+
         if bar_type == 'winbar' then
             bg = M.adjust_color(bg, -10)
         end
-        
+
         return {
             fg = fg,
             bg = bg,
