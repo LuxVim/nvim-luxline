@@ -3,18 +3,25 @@ local M = {}
 local config = require('luxline.config')
 local bar_builder = require('luxline.rendering.bar_builder')
 local state = require('luxline.core.state')
+local events = require('luxline.core.events')
 
 local update_timer = nil
 
 function M.setup_events()
     local group = vim.api.nvim_create_augroup('LuxlineUpdate', { clear = true })
-    
+
     vim.api.nvim_create_autocmd({'BufEnter', 'WinEnter', 'BufWritePost'}, {
         group = group,
         callback = function()
             M.throttled_update()
         end,
     })
+
+    events.on('theme_changed', function()
+        vim.schedule(function()
+            M.update()
+        end)
+    end)
 end
 
 function M.update()
