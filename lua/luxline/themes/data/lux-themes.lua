@@ -1,13 +1,41 @@
--- LUX theme definitions
--- Extracted from themes/init.lua for better maintainability
-
 return {
-    ['lux-vesper'] = {
-        foreground = '#e0e7ff',
-        fallback = '#4a3674',
+    ['nami'] = {
         gradient = {
-            '#0f0f23', '#1a1a2e', '#2A305E', '#4a3674',
-            '#7c3aed', '#8b5cf6', '#a855f7'
+            { bg = '#0d1821', fg = '#e8dcc8' },
+            { bg = '#1a2734', fg = '#e8dcc8' },
+            { bg = '#2a3a4a', fg = '#e8dcc8' },
+            { bg = '#3a9ba8', fg = '#e8dcc8' },
+            { bg = '#4fc9c9', fg = '#0d1821' },
+            { bg = '#ff8c6b', fg = '#0d1821' },
+            { bg = '#ffd48c', fg = '#0d1821' },
+        },
+        middle = '#1a2734',
+        semantic = {
+            LuxlineFilename = { fg = '#e8dcc8', bg = '#4fc9c9' },
+            LuxlineWinbarFilename = { fg = '#e8dcc8', bg = '#3a9ba8' },
+            LuxlineModified = { fg = '#ffd48c', bg = '#ff6b4a', bold = true },
+            LuxlineWinbarModified = { fg = '#ffd48c', bg = '#ff6b4a', bold = true },
+            LuxlineGit = { fg = '#4fc9c9', bg = '#2a3a4a' },
+            LuxlineWinbarGit = { fg = '#4fc9c9', bg = '#1a2734' },
+            LuxlinePosition = { fg = '#e8dcc8', bg = '#ff8c6b' },
+            LuxlineWinbarPosition = { fg = '#e8dcc8', bg = '#3a9ba8' },
+            LuxlinePercent = { fg = '#0d1821', bg = '#ffd48c' },
+            LuxlineWinbarPercent = { fg = '#0d1821', bg = '#ffa857' },
+            LuxlineWindownumber = { fg = '#ffd48c', bg = '#2a3a4a', bold = true },
+            LuxlineWinbarWindownumber = { fg = '#ffd48c', bg = '#1a2734', bold = true },
+            LuxlineSpacer = { fg = '#1a2734', bg = '#1a2734' },
+            LuxlineWinbarSpacer = { fg = '#1a2734', bg = '#1a2734' },
+        },
+    },
+    ['lux-vesper'] = {
+        gradient = {
+            { bg = '#0f0f23', fg = '#e0e7ff' },
+            { bg = '#1a1a2e', fg = '#e0e7ff' },
+            { bg = '#2A305E', fg = '#e0e7ff' },
+            { bg = '#4a3674', fg = '#e0e7ff' },
+            { bg = '#7c3aed', fg = '#ffffff' },
+            { bg = '#8b5cf6', fg = '#ffffff' },
+            { bg = '#a855f7', fg = '#1a1a1a' },
         },
         middle = '#1a1a2e',
         semantic = {
@@ -24,43 +52,119 @@ return {
             LuxlineWindownumber = { fg = '#fbbf24', bg = '#4a3674', bold = true },
             LuxlineWinbarWindownumber = { fg = '#fbbf24', bg = '#3c2e60', bold = true },
             LuxlineSpacer = { fg = '#1a1a2e', bg = '#1a1a2e' },
-            LuxlineWinbarSpacer = { fg = '#1a1a2e', bg = '#1a1a2e' }
-        }
+            LuxlineWinbarSpacer = { fg = '#1a1a2e', bg = '#1a1a2e' },
+        },
     },
     ['lux-aurora'] = {
-        foreground = '#1a1a1a',
-        fallback = '#00bfa5',
         gradient = {
-            '#f2f8f9', '#ecf4f6', '#e0ecef', '#b3e5fc',
-            '#00bfa5', '#00e5ff', '#7c4dff'
+            { bg = '#f2f8f9', fg = '#1a1a1a' },
+            { bg = '#ecf4f6', fg = '#1a1a1a' },
+            { bg = '#e0ecef', fg = '#1a1a1a' },
+            { bg = '#b3e5fc', fg = '#1a1a1a' },
+            { bg = '#00bfa5', fg = '#ffffff' },
+            { bg = '#00e5ff', fg = '#1a1a1a' },
+            { bg = '#7c4dff', fg = '#ffffff' },
         },
-        middle = '#ecf4f6'
+        middle = '#ecf4f6',
+        semantic = {
+            LuxlineFilename = { fg = '#ffffff', bg = '#00bfa5' },
+            LuxlineWinbarFilename = { fg = '#1a1a1a', bg = '#b3e5fc' },
+            LuxlineModified = { fg = '#ffffff', bg = '#f44336', bold = true },
+            LuxlineWinbarModified = { fg = '#ffffff', bg = '#e53935', bold = true },
+            LuxlineGit = { fg = '#1a1a1a', bg = '#e0ecef' },
+            LuxlineWinbarGit = { fg = '#1a1a1a', bg = '#ecf4f6' },
+            LuxlinePosition = { fg = '#1a1a1a', bg = '#00e5ff' },
+            LuxlineWinbarPosition = { fg = '#1a1a1a', bg = '#b3e5fc' },
+            LuxlinePercent = { fg = '#ffffff', bg = '#7c4dff' },
+            LuxlineWinbarPercent = { fg = '#ffffff', bg = '#00bfa5' },
+            LuxlineWindownumber = { fg = '#1a1a1a', bg = '#e0ecef', bold = true },
+            LuxlineWinbarWindownumber = { fg = '#1a1a1a', bg = '#ecf4f6', bold = true },
+            LuxlineSpacer = { fg = '#ecf4f6', bg = '#ecf4f6' },
+            LuxlineWinbarSpacer = { fg = '#ecf4f6', bg = '#ecf4f6' },
+        },
     },
     ['lux-chroma'] = {
-        foreground = '#1a1a1a',
-        fallback = '#20b2aa',
         gradient = {
-            '#fdfbf3', '#faf7ed', '#f4f0e1', '#fffdd0',
-            '#20b2aa', '#ff8c42', '#ff69b4'
+            { bg = '#fdfbf3', fg = '#1a1a1a' },
+            { bg = '#faf7ed', fg = '#1a1a1a' },
+            { bg = '#f4f0e1', fg = '#1a1a1a' },
+            { bg = '#fffdd0', fg = '#1a1a1a' },
+            { bg = '#20b2aa', fg = '#ffffff' },
+            { bg = '#ff8c42', fg = '#1a1a1a' },
+            { bg = '#ff69b4', fg = '#ffffff' },
         },
-        middle = '#faf7ed'
+        middle = '#faf7ed',
+        semantic = {
+            LuxlineFilename = { fg = '#ffffff', bg = '#20b2aa' },
+            LuxlineWinbarFilename = { fg = '#1a1a1a', bg = '#fffdd0' },
+            LuxlineModified = { fg = '#ffffff', bg = '#e53935', bold = true },
+            LuxlineWinbarModified = { fg = '#ffffff', bg = '#d32f2f', bold = true },
+            LuxlineGit = { fg = '#1a1a1a', bg = '#f4f0e1' },
+            LuxlineWinbarGit = { fg = '#1a1a1a', bg = '#faf7ed' },
+            LuxlinePosition = { fg = '#1a1a1a', bg = '#ff8c42' },
+            LuxlineWinbarPosition = { fg = '#1a1a1a', bg = '#fffdd0' },
+            LuxlinePercent = { fg = '#ffffff', bg = '#ff69b4' },
+            LuxlineWinbarPercent = { fg = '#ffffff', bg = '#20b2aa' },
+            LuxlineWindownumber = { fg = '#1a1a1a', bg = '#f4f0e1', bold = true },
+            LuxlineWinbarWindownumber = { fg = '#1a1a1a', bg = '#faf7ed', bold = true },
+            LuxlineSpacer = { fg = '#faf7ed', bg = '#faf7ed' },
+            LuxlineWinbarSpacer = { fg = '#faf7ed', bg = '#faf7ed' },
+        },
     },
     ['lux-eos'] = {
-        foreground = '#1a1a1a',
-        fallback = '#ff8e53',
         gradient = {
-            '#fef4f1', '#fdefeb', '#fbe4df', '#ffab91',
-            '#ff8e53', '#26d0ce', '#ff6b6b'
+            { bg = '#fef4f1', fg = '#1a1a1a' },
+            { bg = '#fdefeb', fg = '#1a1a1a' },
+            { bg = '#fbe4df', fg = '#1a1a1a' },
+            { bg = '#ffab91', fg = '#1a1a1a' },
+            { bg = '#ff8e53', fg = '#ffffff' },
+            { bg = '#26d0ce', fg = '#1a1a1a' },
+            { bg = '#ff6b6b', fg = '#ffffff' },
         },
-        middle = '#fdefeb'
+        middle = '#fdefeb',
+        semantic = {
+            LuxlineFilename = { fg = '#ffffff', bg = '#ff8e53' },
+            LuxlineWinbarFilename = { fg = '#1a1a1a', bg = '#ffab91' },
+            LuxlineModified = { fg = '#ffffff', bg = '#d32f2f', bold = true },
+            LuxlineWinbarModified = { fg = '#ffffff', bg = '#c62828', bold = true },
+            LuxlineGit = { fg = '#1a1a1a', bg = '#fbe4df' },
+            LuxlineWinbarGit = { fg = '#1a1a1a', bg = '#fdefeb' },
+            LuxlinePosition = { fg = '#1a1a1a', bg = '#26d0ce' },
+            LuxlineWinbarPosition = { fg = '#1a1a1a', bg = '#ffab91' },
+            LuxlinePercent = { fg = '#ffffff', bg = '#ff6b6b' },
+            LuxlineWinbarPercent = { fg = '#ffffff', bg = '#ff8e53' },
+            LuxlineWindownumber = { fg = '#1a1a1a', bg = '#fbe4df', bold = true },
+            LuxlineWinbarWindownumber = { fg = '#1a1a1a', bg = '#fdefeb', bold = true },
+            LuxlineSpacer = { fg = '#fdefeb', bg = '#fdefeb' },
+            LuxlineWinbarSpacer = { fg = '#fdefeb', bg = '#fdefeb' },
+        },
     },
     ['lux-umbra'] = {
-        foreground = '#f4edff',
-        fallback = '#5b3094',
         gradient = {
-            '#0a0310', '#180c24', '#2c1a42', '#5b3094',
-            '#6b60e3', '#c471ed', '#d776dd'
+            { bg = '#0a0310', fg = '#f4edff' },
+            { bg = '#180c24', fg = '#f4edff' },
+            { bg = '#2c1a42', fg = '#f4edff' },
+            { bg = '#5b3094', fg = '#f4edff' },
+            { bg = '#6b60e3', fg = '#ffffff' },
+            { bg = '#c471ed', fg = '#1a1a1a' },
+            { bg = '#d776dd', fg = '#1a1a1a' },
         },
-        middle = '#180c24'
-    }
+        middle = '#180c24',
+        semantic = {
+            LuxlineFilename = { fg = '#ffffff', bg = '#6b60e3' },
+            LuxlineWinbarFilename = { fg = '#f4edff', bg = '#5b3094' },
+            LuxlineModified = { fg = '#fbbf24', bg = '#dc2626', bold = true },
+            LuxlineWinbarModified = { fg = '#fbbf24', bg = '#b91c1c', bold = true },
+            LuxlineGit = { fg = '#a7f3d0', bg = '#2c1a42' },
+            LuxlineWinbarGit = { fg = '#a7f3d0', bg = '#180c24' },
+            LuxlinePosition = { fg = '#1a1a1a', bg = '#c471ed' },
+            LuxlineWinbarPosition = { fg = '#f4edff', bg = '#5b3094' },
+            LuxlinePercent = { fg = '#1a1a1a', bg = '#d776dd' },
+            LuxlineWinbarPercent = { fg = '#ffffff', bg = '#6b60e3' },
+            LuxlineWindownumber = { fg = '#d776dd', bg = '#2c1a42', bold = true },
+            LuxlineWinbarWindownumber = { fg = '#c471ed', bg = '#180c24', bold = true },
+            LuxlineSpacer = { fg = '#180c24', bg = '#180c24' },
+            LuxlineWinbarSpacer = { fg = '#180c24', bg = '#180c24' },
+        },
+    },
 }
