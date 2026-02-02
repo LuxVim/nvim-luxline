@@ -48,31 +48,41 @@ end
 
 function M.set_theme(theme_name)
     theme_name = theme_name or vim.g.colors_name or 'default'
-    
+
     local theme = M.get_theme(theme_name)
+
+    if not theme then
+        local auto = require('luxline.themes.auto')
+        theme = auto.generate(vim.g.colors_name)
+
+        if theme then
+            theme = M.validate_theme(theme, 'auto:' .. (vim.g.colors_name or 'unknown'))
+        end
+    end
+
     if not theme then
         if theme_name ~= 'default' then
             vim.notify('Theme not found: ' .. theme_name .. ', falling back to default', vim.log.levels.WARN)
             theme = M.get_theme('default')
         end
-        
+
         if not theme then
             vim.notify('Default theme not available!', vim.log.levels.ERROR)
             return false
         end
     end
-    
+
     current_theme = theme
     state.set('theme', theme_name)
-    
+
     local highlight = require('luxline.rendering.highlight')
     highlight.clear_highlights()
-    
-    events.emit('theme_changed', { 
-        name = theme_name, 
-        theme = theme 
+
+    events.emit('theme_changed', {
+        name = theme_name,
+        theme = theme
     })
-    
+
     return true
 end
 
@@ -129,13 +139,18 @@ end
 
 function M.create_gradient_theme(name, start_color, end_color, foreground)
     local colors = M.interpolate_colors(start_color, end_color, 7)
-    
+    foreground = foreground or '#ffffff'
+
+    local gradient = {}
+    for i, bg in ipairs(colors) do
+        gradient[i] = { bg = bg, fg = foreground }
+    end
+
     local theme = {
-        foreground = foreground or '#ffffff',
-        fallback = colors[4],
-        gradient = colors
+        gradient = gradient,
+        middle = colors[2],
     }
-    
+
     M.register(name, theme)
     return name
 end
@@ -193,18 +208,9 @@ function M.setup()
     end
     
     events.on('colorscheme_changed', function()
-        -- Auto-detect lux themes when colorscheme changes
-        if vim.g.colors_name and vim.g.colors_name:match("^lux%-") then
-            M.set_theme(vim.g.colors_name)
-        else
-            local current_theme_name = state.get('theme')
-            if current_theme_name then
-                M.set_theme(current_theme_name)
-            else
-                -- Fallback: refresh theme based on new colorscheme
-                M.set_theme()
-            end
-        end
+        local auto = require('luxline.themes.auto')
+        auto.invalidate(vim.g.colors_name)
+        M.set_theme(vim.g.colors_name)
     end)
 end
 
