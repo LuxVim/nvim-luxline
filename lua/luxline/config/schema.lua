@@ -1,6 +1,5 @@
 local M = {}
 
--- Unified configuration schema
 M.CONFIG_SCHEMA = {
     items = {
         type = 'table',
@@ -38,55 +37,55 @@ function M.build_config_key(parts)
     return table.concat(parts, '_')
 end
 
-function M.get_all_item_keys()
+local function base_keys_for(section)
     local keys = {}
-    local schema = M.CONFIG_SCHEMA.items
-    
-    for _, side in ipairs(schema.sides) do
-        for _, status in ipairs(schema.statuses) do
-            table.insert(keys, string.format(schema.key_pattern, side, status))
-            for _, bar_type in ipairs(schema.bar_types) do
-                if bar_type ~= 'statusline' then
-                    table.insert(keys, string.format(schema.key_pattern .. '_%s', side, status, bar_type))
-                end
+    if section.statuses then
+        for _, side in ipairs(section.sides) do
+            for _, status in ipairs(section.statuses) do
+                table.insert(keys, string.format(section.key_pattern, side, status))
             end
         end
+    else
+        for _, side in ipairs(section.sides) do
+            table.insert(keys, string.format(section.key_pattern, side))
+        end
     end
-    
     return keys
 end
 
-function M.get_all_separator_keys()
+function M.enumerate_keys(section_name)
+    local section = M.CONFIG_SCHEMA[section_name]
+    if not section or not section.sides then
+        return {}
+    end
+
     local keys = {}
-    local schema = M.CONFIG_SCHEMA.separators
-    
-    for _, side in ipairs(schema.sides) do
-        table.insert(keys, string.format(schema.key_pattern, side))
-        for _, bar_type in ipairs(schema.bar_types) do
+    for _, base in ipairs(base_keys_for(section)) do
+        table.insert(keys, base)
+        for _, bar_type in ipairs(section.bar_types or {}) do
             if bar_type ~= 'statusline' then
-                table.insert(keys, string.format(schema.key_pattern .. '_%s', side, bar_type))
+                table.insert(keys, base .. '_' .. bar_type)
             end
         end
     end
-    
     return keys
 end
 
 function M.validate_by_schema(config, schema_section)
     local errors = {}
     local schema = M.CONFIG_SCHEMA[schema_section]
-    
+
     if not schema then
         return errors
     end
-    
+
     if schema.keys then
         for _, key in ipairs(schema.keys) do
             local value = config[key]
             if value ~= nil then
                 local expected_type = schema.type
                 local actual_type = type(value)
-                
+
                 if actual_type ~= expected_type then
                     table.insert(errors, string.format(
                         '%s expected %s, got %s',
@@ -101,37 +100,32 @@ function M.validate_by_schema(config, schema_section)
             end
         end
     end
-    
+
     return errors
 end
 
 function M.validate_all_config(config)
     local errors = {}
-    
-    -- Validate each schema section
+
     for section_name, _ in pairs(M.CONFIG_SCHEMA) do
         if section_name ~= 'items' and section_name ~= 'separators' then
             local section_errors = M.validate_by_schema(config, section_name)
             vim.list_extend(errors, section_errors)
         end
     end
-    
-    -- Validate item configuration keys
-    local item_keys = M.get_all_item_keys()
-    for _, key in ipairs(item_keys) do
+
+    for _, key in ipairs(M.enumerate_keys('items')) do
         if config[key] and type(config[key]) ~= 'table' then
             table.insert(errors, key .. ' must be a table/array')
         end
     end
-    
-    -- Validate separator keys
-    local separator_keys = M.get_all_separator_keys()
-    for _, key in ipairs(separator_keys) do
+
+    for _, key in ipairs(M.enumerate_keys('separators')) do
         if config[key] and type(config[key]) ~= 'string' then
             table.insert(errors, key .. ' must be a string')
         end
     end
-    
+
     return errors
 end
 
