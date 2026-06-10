@@ -1,0 +1,47 @@
+local assert = dofile(vim.fn.fnamemodify(debug.getinfo(1, 'S').source:sub(2), ':p:h:h') .. '/helpers/assert.lua')
+local timing = require('luxline.primitives.timing')
+
+describe('primitives.timing', function()
+    it('throttle coalesces calls while armed, then re-arms', function()
+        local count = 0
+        local throttled = timing.throttle(function() count = count + 1 end, function() return 20 end)
+        throttled()
+        throttled()
+        throttled()
+        assert.truthy(vim.wait(500, function() return count == 1 end), 'first fire')
+        throttled()
+        assert.truthy(vim.wait(500, function() return count == 2 end), 'second fire after re-arm')
+    end)
+
+    it('throttle latches the most recent call arguments', function()
+        local seen = nil
+        local throttled = timing.throttle(function(value) seen = value end, function() return 20 end)
+        throttled('first')
+        throttled('latest')
+        assert.truthy(vim.wait(500, function() return seen ~= nil end))
+        assert.eq(seen, 'latest')
+    end)
+
+    it('throttle callback runs on the main loop and may touch vim.api (no E5560)', function()
+        local result = nil
+        local throttled = timing.throttle(function()
+            result = vim.api.nvim_get_option_value('filetype', { buf = 0 })
+        end, function() return 10 end)
+        throttled()
+        assert.truthy(vim.wait(500, function() return result ~= nil end), 'callback completed without fast-context error')
+    end)
+
+    it('keyed_debounce restarts the timer per key and isolates keys', function()
+        local fired = {}
+        local trigger = timing.keyed_debounce(function() return 40 end)
+        trigger('a', function() table.insert(fired, 'a') end)
+        vim.wait(20, function() return false end)
+        trigger('a', function() table.insert(fired, 'a') end)
+        trigger('b', function()
+            table.insert(fired, 'b')
+            vim.api.nvim_get_option_value('filetype', { buf = 0 })
+        end)
+        assert.truthy(vim.wait(500, function() return #fired == 2 end), 'both keys fired exactly once')
+        assert.eq(#fired, 2)
+    end)
+end)
