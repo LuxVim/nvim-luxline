@@ -1,0 +1,65 @@
+local assert = dofile(vim.fn.fnamemodify(debug.getinfo(1, 'S').source:sub(2), ':p:h:h') .. '/helpers/assert.lua')
+
+describe('themes', function()
+    it('keeps the public theme API and drops the dead surface', function()
+        local themes = require('luxline.themes')
+        themes.setup()
+        assert.truthy(themes.set_theme)
+        assert.truthy(themes.get_theme)
+        assert.truthy(themes.get_theme_names)
+        assert.truthy(themes.get_current_theme)
+        assert.truthy(themes.preview_theme)
+        assert.truthy(themes.register)
+        assert.truthy(themes.create_gradient_theme)
+        assert.truthy(themes.validate_theme)
+        assert.eq(themes.export_theme, nil)
+        assert.eq(themes.create_inherited_theme, nil)
+        assert.eq(themes.create_theme, nil)
+        assert.eq(themes.interpolate_colors, nil)
+    end)
+
+    it('creates a 7-stop gradient theme via the color primitive', function()
+        local themes = require('luxline.themes')
+        themes.create_gradient_theme('spec-gradient', '#000000', '#0000ff', '#ffffff')
+        local theme = themes.get_theme('spec-gradient')
+        assert.eq(#theme.gradient, 7)
+        assert.eq(theme.gradient[1].bg, '#000000')
+        assert.eq(theme.gradient[7].bg, '#0000ff')
+        assert.eq(theme.gradient[4].bg, '#000080')
+        assert.eq(theme.gradient[1].fg, '#ffffff')
+    end)
+
+    it('repairs malformed themes to the grayscale default', function()
+        local validation = require('luxline.themes.validation')
+        local repaired = validation.validate_theme({ gradient = { 'not-a-table' } }, 'spec-bad')
+        assert.eq(#repaired.gradient, 7)
+        assert.truthy(repaired.gradient[1].bg:match('^#%x%x%x%x%x%x$'))
+        assert.eq(validation.validate_gradient, nil, 'dead validators removed')
+        assert.eq(validation.validate_semantic_groups, nil)
+    end)
+
+    it('accepts the corrected README example shape (table entries with fg)', function()
+        local themes = require('luxline.themes')
+        themes.register('spec-readme', {
+            gradient = {
+                { bg = '#1a1a1a', fg = '#ffffff' }, { bg = '#2a2a2a', fg = '#ffffff' },
+                { bg = '#3a3a3a', fg = '#ffffff' }, { bg = '#4a4a4a', fg = '#ffffff' },
+                { bg = '#5a5a5a', fg = '#ffffff' }, { bg = '#6a6a6a', fg = '#ffffff' },
+                { bg = '#7a7a7a', fg = '#ffffff' },
+            },
+        })
+        local theme = themes.get_theme('spec-readme')
+        assert.eq(theme.gradient[7].bg, '#7a7a7a')
+    end)
+
+    it('auto-generates a theme from the active colorscheme highlights', function()
+        vim.api.nvim_set_hl(0, 'Normal', { bg = '#0a0a0a', fg = '#e0e0e0' })
+        local auto = require('luxline.themes.auto')
+        auto.invalidate('spec-auto')
+        local theme = auto.generate('spec-auto')
+        assert.eq(#theme.gradient, 7)
+        assert.eq(theme.gradient[1].bg, '#0a0a0a')
+        assert.truthy(theme.semantic, 'semantic map present')
+        assert.eq(auto.invalidate_all, nil, 'dead invalidate_all removed')
+    end)
+end)
