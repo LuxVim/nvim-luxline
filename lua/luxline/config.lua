@@ -1,6 +1,6 @@
 local M = {}
 
-local utils = require('luxline.core.utils')
+local tbl = require('luxline.primitives.table')
 local events = require('luxline.core.events')
 local defaults_mod = require('luxline.config.defaults')
 local validation = require('luxline.config.validation')
@@ -13,7 +13,7 @@ function M.setup(opts)
     
     validation.validate_config(opts)
     
-    config = utils.deep_merge(vim.deepcopy(defaults), opts)
+    config = tbl.deep_merge(vim.deepcopy(defaults), opts)
     
     events.emit('config_updated', { config = config })
 end

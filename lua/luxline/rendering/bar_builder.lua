@@ -2,8 +2,9 @@ local M = {}
 
 local config = require('luxline.config')
 local items = require('luxline.items')
+local window_context = require('luxline.core.context')
+local tbl = require('luxline.primitives.table')
 local highlight = require('luxline.rendering.highlight')
-local utils = require('luxline.core.utils')
 local events = require('luxline.core.events')
 
 function M.build_for_context(context, bar_type)
@@ -22,7 +23,7 @@ function M.build_section(side, status_type, context, bar_type)
     local section = {}
     
     if side == 'right' then
-        item_list = utils.reverse_table(item_list)
+        item_list = tbl.reverse(item_list)
     end
     
     -- First pass: collect valid items with their rendered positions
@@ -30,7 +31,7 @@ function M.build_section(side, status_type, context, bar_type)
     local rendered_position = 1
     
     for idx, item_spec in ipairs(item_list) do
-        local item_name, variant = utils.split_item_variant(item_spec)
+        local item_name, variant = items.parse_spec(item_spec)
         local item_value = items.get_value(item_name, variant, context)
         
         if item_value and item_value ~= '' then
@@ -80,7 +81,7 @@ end
 
 function M.update_all_windows(bar_type)
     bar_type = bar_type or 'statusline'
-    local windows = utils.gather_window_info()
+    local windows = window_context.gather_window_info()
     local option_name = bar_type == 'winbar' and 'winbar' or 'statusline'
     
     for win, info in pairs(windows) do
@@ -114,7 +115,7 @@ function M.update_window(winid, bar_type)
         end
     end
     
-    local context = utils.create_context(winid, bufnr)
+    local context = window_context.create_context(winid, bufnr)
     local content = M.build_for_context(context, bar_type)
     vim.api.nvim_set_option_value(option_name, content, { win = winid })
     
@@ -125,10 +126,10 @@ function M.preview(config_override, bar_type)
     bar_type = bar_type or 'statusline'
     local old_config = config.get()
     if config_override then
-        config.setup(utils.deep_merge(vim.deepcopy(old_config), config_override))
+        config.setup(tbl.deep_merge(vim.deepcopy(old_config), config_override))
     end
     
-    local context = utils.get_current_context()
+    local context = window_context.get_current_context()
     context.active = true
     
     local preview = M.build_for_context(context, bar_type)

@@ -1,6 +1,5 @@
 local M = {}
 
-local utils = require('luxline.core.utils')
 
 -- Highlight strategy interface
 local highlight_strategies = {}

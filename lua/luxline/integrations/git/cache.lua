@@ -1,20 +1,22 @@
 local M = {}
 
-local utils = require('luxline.core.utils')
+local cache = require('luxline.primitives.cache')
 local state = require('luxline.core.state')
 local events = require('luxline.core.events')
 
+local git_cache = cache.namespace('git')
+
 function M.clear_cache(repo_root)
     if repo_root then
-        utils.cache_clear('git', 'branch_' .. repo_root)
-        utils.cache_clear('git', 'diff_' .. repo_root)
+        git_cache:clear('branch_' .. repo_root)
+        git_cache:clear('diff_' .. repo_root)
         
         local git_info = state.get_git_info(repo_root)
         git_info.branch = ''
         git_info.diff = ''
         state.set_git_info(repo_root, git_info)
     else
-        utils.cache_clear('git')
+        git_cache:clear()
         state.set('git_info', {})
     end
     

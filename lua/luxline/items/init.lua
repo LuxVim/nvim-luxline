@@ -1,17 +1,28 @@
 local M = {}
 
-local utils = require('luxline.core.utils')
+local context = require('luxline.core.context')
+local cache = require('luxline.primitives.cache')
 local events = require('luxline.core.events')
 
 local items = {}
+local item_cache = cache.namespace('items')
+
+local function create_cache_key(item_name, variant, bufnr)
+    return string.format('%s_%s_%s', item_name, variant or 'default', bufnr)
+end
+
+function M.parse_spec(item_spec)
+    local name, variant = item_spec:match('^([^:]+):?(.*)$')
+    return name, variant ~= '' and variant or nil
+end
 
 function M.register(name, func, opts)
     opts = opts or {}
-    
+
     if type(func) ~= 'function' then
         error('Item function must be a function')
     end
-    
+
     items[name] = {
         func = func,
         description = opts.description or '',
@@ -21,44 +32,43 @@ function M.register(name, func, opts)
         cache_ttl = opts.cache_ttl or 1000,
         async = opts.async or false
     }
-    
-    events.emit('item_registered', { 
-        name = name, 
+
+    events.emit('item_registered', {
+        name = name,
         category = opts.category,
-        variants = opts.variants 
+        variants = opts.variants
     })
 end
 
-function M.get_value(item_name, variant, context)
+function M.get_value(item_name, variant, ctx)
     local item = items[item_name]
     if not item then
         return ''
     end
-    
-    context = context or utils.get_current_context()
-    
+
+    ctx = ctx or context.get_current_context()
+
+    local cache_key
     if item.cache then
-        local cache_key = utils.create_cache_key(item_name, variant, context.bufnr)
-        local cached = utils.cache_get('items', cache_key)
-        
+        cache_key = create_cache_key(item_name, variant, ctx.bufnr)
+        local cached = item_cache:get(cache_key)
         if cached then
             return cached
         end
     end
-    
-    local ok, result = pcall(item.func, variant, context)
+
+    local ok, result = pcall(item.func, variant, ctx)
     if not ok then
         vim.notify('Item error (' .. item_name .. '): ' .. tostring(result), vim.log.levels.ERROR)
         return ''
     end
-    
-    result = utils.ensure_string(result, '')
-    
+
+    result = (type(result) == 'string' and result ~= '') and result or ''
+
     if item.cache and result ~= '' then
-        local cache_key = utils.create_cache_key(item_name, variant, context.bufnr)
-        utils.cache_set('items', cache_key, result, item.cache_ttl)
+        item_cache:set(cache_key, result, item.cache_ttl)
     end
-    
+
     return result
 end
 
@@ -81,20 +91,14 @@ function M.get_items_by_category(category)
 end
 
 function M.clear_cache(item_name)
-    if item_name then
-        -- Clear specific item from cache (requires iterating through namespace)
-        utils.cache_clear('items')
-    else
-        utils.cache_clear('items')
-    end
-    
+    item_cache:clear()
     events.emit('item_cache_cleared', { item_name = item_name })
 end
 
 function M.auto_discover()
     local runtime_files = vim.api.nvim_get_runtime_file('lua/luxline/items/*.lua', true)
     local loaded_count = 0
-    
+
     for _, file in ipairs(runtime_files) do
         local module_name = vim.fn.fnamemodify(file, ':t:r')
         if module_name ~= 'init' and module_name ~= 'metadata' then
@@ -106,14 +110,14 @@ function M.auto_discover()
             end
         end
     end
-    
+
     events.emit('items_auto_discovered', { count = loaded_count })
     return loaded_count
 end
 
 function M.setup()
     M.auto_discover()
-    
+
     events.on('buffer_changed', function()
         M.clear_cache()
     end)

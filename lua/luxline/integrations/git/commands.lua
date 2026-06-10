@@ -1,8 +1,10 @@
 local M = {}
 
-local utils = require('luxline.core.utils')
+local cache = require('luxline.primitives.cache')
 local events = require('luxline.core.events')
 local config = require('luxline.config')
+
+local git_cache = cache.namespace('git')
 
 local running_jobs = {}
 
@@ -24,7 +26,7 @@ function M.execute_git_command(cmd, repo_root, callback, cache_key, force)
     force = force or false
     
     if not force then
-        local cached = utils.cache_get('git', cache_key)
+        local cached = git_cache:get(cache_key)
         if cached then
             callback(0, { cached })
             return
@@ -49,7 +51,7 @@ function M.execute_git_command(cmd, repo_root, callback, cache_key, force)
         local output = result.stdout and vim.trim(result.stdout) or ''
         if output ~= '' and result.code == 0 then
             local timeout = config.get().git_cache_timeout or 5000
-            utils.cache_set('git', cache_key, output, timeout)
+            git_cache:set(cache_key, output, timeout)
         end
         
         callback(result.code, { output })
@@ -76,14 +78,14 @@ function M.get_repo_root_cached(path)
     path = path or vim.fn.expand('%:p:h')
     local cache_key = 'repo_root_' .. path
     
-    local cached = utils.cache_get('git', cache_key)
+    local cached = git_cache:get(cache_key)
     if cached then
         return cached
     end
     
     local repo_root = get_repo_root(path)
     if repo_root then
-        utils.cache_set('git', cache_key, repo_root, 30000) -- 30 second cache
+        git_cache:set(cache_key, repo_root, 30000) -- 30 second cache
     end
     
     return repo_root
