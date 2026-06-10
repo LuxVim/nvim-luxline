@@ -1,15 +1,16 @@
-local items = require('luxline.items')
+local definition = require('luxline.items.definition')
 
-items.register('position', function(variant, context)
-    if variant == 'line' then
-        return tostring(vim.fn.line('.'))
-    elseif variant == 'column' then
-        return tostring(vim.fn.col('.'))
-    else
-        return vim.fn.line('.') .. ':' .. vim.fn.col('.')
-    end
-end, {
-    description = "Cursor position (line:column)",
-    category = "cursor",
-    variants = { 'line', 'column' }
+definition.define('position', {
+    description = 'Cursor position (line:column)',
+    category = 'cursor',
+    get = function()
+        return { line = vim.fn.line('.'), column = vim.fn.col('.') }
+    end,
+    variants = {
+        line = function(pos) return tostring(pos.line) end,
+        column = function(pos) return tostring(pos.column) end,
+    },
+    format = function(pos)
+        return pos.line .. ':' .. pos.column
+    end,
 })

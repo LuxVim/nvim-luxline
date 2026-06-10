@@ -1,8 +1,7 @@
-local items = require('luxline.items')
+local definition = require('luxline.items.definition')
 
-items.register('spacer', function(variant, context)
-    return '%='
-end, {
-    description = "Flexible space separator",
-    category = "layout"
+definition.define('spacer', {
+    description = 'Flexible space separator',
+    category = 'layout',
+    get = function() return '%=' end,
 })

@@ -29,8 +29,7 @@ function M.register(name, func, opts)
         category = opts.category or 'misc',
         variants = opts.variants or {},
         cache = opts.cache or false,
-        cache_ttl = opts.cache_ttl or 1000,
-        async = opts.async or false
+        cache_ttl = opts.cache_ttl or 1000
     }
 
     events.emit('item_registered', {
@@ -80,16 +79,6 @@ function M.get_all_items()
     return vim.tbl_keys(items)
 end
 
-function M.get_items_by_category(category)
-    local result = {}
-    for name, item in pairs(items) do
-        if item.category == category then
-            table.insert(result, name)
-        end
-    end
-    return result
-end
-
 function M.clear_cache(item_name)
     item_cache:clear()
     events.emit('item_cache_cleared', { item_name = item_name })
@@ -101,7 +90,8 @@ function M.auto_discover()
 
     for _, file in ipairs(runtime_files) do
         local module_name = vim.fn.fnamemodify(file, ':t:r')
-        if module_name ~= 'init' and module_name ~= 'metadata' then
+        if module_name ~= 'init' and module_name ~= 'metadata'
+            and module_name ~= 'base' and module_name ~= 'definition' then
             local ok, _ = pcall(require, 'luxline.items.' .. module_name)
             if ok then
                 loaded_count = loaded_count + 1
@@ -117,10 +107,6 @@ end
 
 function M.setup()
     M.auto_discover()
-
-    events.on('buffer_changed', function()
-        M.clear_cache()
-    end)
 end
 
 return M
