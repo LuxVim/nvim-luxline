@@ -3,7 +3,6 @@ local M = {}
 local state = {
     initialized = false,
     theme = nil,
-    config = {},
     git_info = {},
 }
 
@@ -16,14 +15,6 @@ function M.set(key, value)
         return
     end
     state[key] = value
-end
-
-function M.update(updates)
-    for key, value in pairs(updates) do
-        if state[key] ~= value then
-            state[key] = value
-        end
-    end
 end
 
 function M.get_git_info(repo_path)
@@ -40,7 +31,6 @@ function M.reset()
     state = {
         initialized = false,
         theme = nil,
-        config = {},
         git_info = {},
     }
 end
