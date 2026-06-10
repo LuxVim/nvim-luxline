@@ -1,15 +1,15 @@
-local items = require('luxline.items')
+local definition = require('luxline.items.definition')
 
-items.register('windownumber', function(variant, context)
-    -- If we have a winid in context (for winbar), use that to get the window number
-    if context.winid then
-        local ok, win_number = pcall(vim.api.nvim_win_get_number, context.winid)
-        if ok then
-            return tostring(win_number)
+definition.define('windownumber', {
+    description = 'Current window number',
+    category = 'window',
+    get = function(ctx)
+        if ctx and ctx.winid then
+            local ok, win_number = pcall(vim.api.nvim_win_get_number, ctx.winid)
+            if ok then
+                return win_number
+            end
         end
-    end
-    return tostring(vim.fn.winnr())
-end, {
-    description = "Current window number",
-    category = "window"
+        return vim.fn.winnr()
+    end,
 })
