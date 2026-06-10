@@ -1,6 +1,6 @@
 local M = {}
 
-local utils = require('luxline.core.utils')
+local tbl = require('luxline.primitives.table')
 
 M.DEFAULT_THEME = {
     gradient = {},
@@ -27,7 +27,7 @@ function M.validate_theme(theme, name)
         return M.get_default_theme()
     end
 
-    local validated = utils.deep_merge(M.get_default_theme(), theme)
+    local validated = tbl.deep_merge(M.get_default_theme(), theme)
 
     if not validated.gradient or #validated.gradient ~= 7 then
         if name then

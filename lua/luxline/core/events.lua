@@ -56,8 +56,4 @@ function M.clear(event)
     end
 end
 
-function M.get_listeners(event)
-    return listeners[event] and #listeners[event] or 0
-end
-
 return M

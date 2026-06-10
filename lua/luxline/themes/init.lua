@@ -1,6 +1,6 @@
 local M = {}
 
-local utils = require('luxline.core.utils')
+local tbl = require('luxline.primitives.table')
 local events = require('luxline.core.events')
 local state = require('luxline.core.state')
 
@@ -92,7 +92,7 @@ function M.create_inherited_theme(base_name, overrides, new_name)
         error('Base theme not found: ' .. base_name)
     end
     
-    local new_theme = utils.deep_merge(vim.deepcopy(base_theme), overrides)
+    local new_theme = tbl.deep_merge(vim.deepcopy(base_theme), overrides)
     
     if new_name then
         M.register(new_name, new_theme)

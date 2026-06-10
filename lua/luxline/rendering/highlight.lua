@@ -1,12 +1,18 @@
 local M = {}
 
-local utils = require('luxline.core.utils')
 local events = require('luxline.core.events')
 local strategies = require('luxline.rendering.highlight_strategies')
 
 local active_groups = {}
 local separator_cache = {}
 local item_highlight_mappings = {}
+
+local function format_highlight(name, content)
+    if not name or not content or content == '' then
+        return ''
+    end
+    return string.format('%%#%s# %s ', name, content)
+end
 
 function M.item(value, side, idx, bar_type, item_name)
     bar_type = bar_type or 'statusline'
@@ -24,7 +30,7 @@ function M.item(value, side, idx, bar_type, item_name)
     -- Store the group for separator logic
     M.store_item_highlight_mapping(side, idx, bar_type, group_name)
     
-    return utils.format_highlight(group_name, value)
+    return format_highlight(group_name, value)
 end
 
 
