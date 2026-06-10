@@ -11,6 +11,6 @@ describe('harness', function()
     end)
 
     it('loads luxline from the repo runtimepath', function()
-        assert.eq(require('luxline')._VERSION, '2.0.0')
+        assert.eq(require('luxline')._VERSION, '3.0.0')
     end)
 end)
