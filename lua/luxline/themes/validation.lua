@@ -1,5 +1,6 @@
 local M = {}
 
+local color = require('luxline.primitives.color')
 local tbl = require('luxline.primitives.table')
 
 M.DEFAULT_THEME = {
@@ -46,58 +47,8 @@ function M.validate_theme(theme, name)
     return validated
 end
 
-function M.validate_color(color)
-    if type(color) ~= 'string' then
-        return false
-    end
-
-    return color:match('^#%x%x%x%x%x%x$') ~= nil
-end
-
-function M.validate_gradient(gradient)
-    if type(gradient) ~= 'table' then
-        return false, 'Gradient must be a table'
-    end
-
-    if #gradient ~= 7 then
-        return false, 'Gradient must have exactly 7 entries'
-    end
-
-    for i, entry in ipairs(gradient) do
-        if type(entry) ~= 'table' then
-            return false, 'Gradient entry ' .. i .. ' must be a table'
-        end
-        if not M.validate_color(entry.bg) then
-            return false, 'Invalid bg color at position ' .. i
-        end
-        if entry.fg and not M.validate_color(entry.fg) then
-            return false, 'Invalid fg color at position ' .. i
-        end
-    end
-
-    return true
-end
-
-function M.validate_semantic_groups(semantic)
-    if type(semantic) ~= 'table' then
-        return false, 'Semantic groups must be a table'
-    end
-
-    for group_name, group_def in pairs(semantic) do
-        if type(group_def) ~= 'table' then
-            return false, 'Semantic group definition must be a table: ' .. group_name
-        end
-
-        if group_def.fg and not M.validate_color(group_def.fg) then
-            return false, 'Invalid foreground color in group: ' .. group_name
-        end
-
-        if group_def.bg and not M.validate_color(group_def.bg) then
-            return false, 'Invalid background color in group: ' .. group_name
-        end
-    end
-
-    return true
+function M.validate_color(value)
+    return color.is_hex(value)
 end
 
 return M

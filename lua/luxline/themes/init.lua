@@ -1,6 +1,6 @@
 local M = {}
 
-local tbl = require('luxline.primitives.table')
+local color = require('luxline.primitives.color')
 local events = require('luxline.core.events')
 local state = require('luxline.core.state')
 
@@ -15,7 +15,7 @@ function M.register(name, theme_func_or_table)
     else
         error('Theme must be a function or table')
     end
-    
+
     events.emit('theme_registered', { name = name })
 end
 
@@ -27,13 +27,13 @@ function M.get_theme(name)
     if not themes[name] then
         return nil
     end
-    
+
     local theme = themes[name]()
     if not theme then
         vim.notify('Theme function returned nil: ' .. name, vim.log.levels.WARN)
         return nil
     end
-    
+
     return M.validate_theme(theme, name)
 end
 
@@ -86,59 +86,8 @@ function M.set_theme(theme_name)
     return true
 end
 
-function M.create_inherited_theme(base_name, overrides, new_name)
-    local base_theme = M.get_theme(base_name)
-    if not base_theme then
-        error('Base theme not found: ' .. base_name)
-    end
-    
-    local new_theme = tbl.deep_merge(vim.deepcopy(base_theme), overrides)
-    
-    if new_name then
-        M.register(new_name, new_theme)
-        return new_name
-    end
-    
-    return new_theme
-end
-
-function M.interpolate_colors(color1, color2, steps)
-    local function hex_to_rgb(hex)
-        hex = hex:gsub('#', '')
-        return {
-            r = tonumber(hex:sub(1, 2), 16),
-            g = tonumber(hex:sub(3, 4), 16),
-            b = tonumber(hex:sub(5, 6), 16)
-        }
-    end
-    
-    local function rgb_to_hex(rgb)
-        return string.format('#%02x%02x%02x', 
-            math.floor(rgb.r + 0.5),
-            math.floor(rgb.g + 0.5),
-            math.floor(rgb.b + 0.5)
-        )
-    end
-    
-    local rgb1 = hex_to_rgb(color1)
-    local rgb2 = hex_to_rgb(color2)
-    
-    local colors = {}
-    for i = 0, steps - 1 do
-        local t = i / (steps - 1)
-        local rgb = {
-            r = rgb1.r + (rgb2.r - rgb1.r) * t,
-            g = rgb1.g + (rgb2.g - rgb1.g) * t,
-            b = rgb1.b + (rgb2.b - rgb1.b) * t
-        }
-        table.insert(colors, rgb_to_hex(rgb))
-    end
-    
-    return colors
-end
-
 function M.create_gradient_theme(name, start_color, end_color, foreground)
-    local colors = M.interpolate_colors(start_color, end_color, 7)
+    local colors = color.interpolate(start_color, end_color, 7)
     foreground = foreground or '#ffffff'
 
     local gradient = {}
@@ -146,24 +95,21 @@ function M.create_gradient_theme(name, start_color, end_color, foreground)
         gradient[i] = { bg = bg, fg = foreground }
     end
 
-    local theme = {
+    M.register(name, {
         gradient = gradient,
         middle = colors[2],
-    }
-
-    M.register(name, theme)
+    })
     return name
 end
 
 function M.preview_theme(theme_name)
-    local old_theme = current_theme
     local old_theme_name = state.get('theme')
-    
+
     if M.set_theme(theme_name) then
         vim.schedule(function()
             local bar_builder = require('luxline.rendering.bar_builder')
             bar_builder.statusline.update_all()
-            
+
             vim.defer_fn(function()
                 M.set_theme(old_theme_name)
                 bar_builder.statusline.update_all()
@@ -172,41 +118,15 @@ function M.preview_theme(theme_name)
     end
 end
 
-function M.export_theme(theme_name, format)
-    format = format or 'lua'
-    local theme = M.get_theme(theme_name)
-    if not theme then
-        return nil
-    end
-    
-    if format == 'lua' then
-        local lines = { 'return {' }
-        for key, value in pairs(theme) do
-            table.insert(lines, string.format('    %s = %q,', key, value))
-        end
-        table.insert(lines, '}')
-        return table.concat(lines, '\n')
-    elseif format == 'json' then
-        return vim.json.encode(theme)
-    end
-    
-    return nil
-end
-
-function M.create_theme(name, theme_config)
-    M.register(name, theme_config)
-end
-
 function M.setup()
     require('luxline.themes.default')
-    
-    -- Register lux themes from external data file
+
     local lux_themes = require('luxline.themes.data.lux-themes')
-    
+
     for name, theme_data in pairs(lux_themes) do
         M.register(name, theme_data)
     end
-    
+
     events.on('colorscheme_changed', function()
         local auto = require('luxline.themes.auto')
         auto.invalidate(vim.g.colors_name)
