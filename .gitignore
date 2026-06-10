@@ -54,3 +54,5 @@ luac.out
 *.temp
 
 CLAUDE.md
+docs/plans/
+docs/superpowers/
