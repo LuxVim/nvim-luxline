@@ -7,6 +7,8 @@
 
 A highly customizable statusline and winbar for Neovim, featuring intelligent item loading, gradient-based theming, git integration, and context-aware configurations designed for modern development workflows.
 
+> **3.0.0 behavior change:** item-list config values now *replace* the defaults instead of being merged index-by-index. If you relied on a short list inheriting trailing default entries, list the items you want explicitly. An empty list (`{}`) now correctly renders nothing.
+
 ---
 
 ## ✨ Features
@@ -20,7 +22,7 @@ A highly customizable statusline and winbar for Neovim, featuring intelligent it
 - **Intelligent Item System**
   - Auto-discovery of statusline items with variant support
   - Comprehensive built-in items (file, git, position, encoding)
-  - Extensible item registration with caching and async support
+  - Extensible item registration with opt-in caching
   - Rich context passed to items (buffer, window, filetype data)
 
 - **Advanced Theming**
@@ -42,7 +44,7 @@ A highly customizable statusline and winbar for Neovim, featuring intelligent it
   - Multi-repository support with per-repo state management
 
 - **Compatibility**
-  - Neovim 0.5.0+ required (uses modern Lua APIs)
+  - Neovim 0.10+ required (uses `vim.system`, `vim.uv`, and modern option APIs)
   - Cross-platform support (Linux, macOS, Windows)
   - No external dependencies required
 
@@ -219,11 +221,15 @@ require("luxline.themes").preview_theme("lux-chroma")
 local themes = require("luxline.themes")
 
 themes.register("my-theme", {
-  foreground = "#ffffff",
   gradient = {
-    "#1a1a1a", "#2a2a2a", "#3a3a3a", "#4a4a4a",
-    "#5a5a5a", "#6a6a6a", "#7a7a7a"
-  }
+    { bg = "#1a1a1a", fg = "#ffffff" },
+    { bg = "#2a2a2a", fg = "#ffffff" },
+    { bg = "#3a3a3a", fg = "#ffffff" },
+    { bg = "#4a4a4a", fg = "#ffffff" },
+    { bg = "#5a5a5a", fg = "#ffffff" },
+    { bg = "#6a6a6a", fg = "#ffffff" },
+    { bg = "#7a7a7a", fg = "#ffffff" },
+  },
 })
 ```
 
@@ -305,8 +311,7 @@ end, {
   category = "custom",
   variants = { "short", "long" },
   cache = true,                          -- Enable caching for performance
-  cache_ttl = 5000,                     -- Cache duration in milliseconds
-  async = false                         -- Whether item supports async operations
+  cache_ttl = 5000                      -- Cache duration in milliseconds
 })
 ```
 
